@@ -83,7 +83,6 @@ struct AuthView: View {
                                         }
                                         .padding(.vertical, 14)
                                         .padding(.horizontal, 16)
-                                        .foregroundColor(greyColor)
                                         .background(whiteColor)
                                         .cornerRadius(8)
                                         .overlay(
@@ -192,7 +191,7 @@ struct AuthView: View {
                             .padding(.horizontal, horizontalPadding)
                             .padding(.vertical, 32)
                             .background(
-                                whiteColor.opacity(0.0) // если нужна белая подложка, увеличь opacity
+                                whiteColor.opacity(0.0)
                                     .cornerRadius(24)
                             )
                             .frame(maxWidth: .infinity)
@@ -203,25 +202,15 @@ struct AuthView: View {
                     }
                     .scrollDisabled(true)
                 }
-
-                // NavigationLink на OnboardingView
-                NavigationLink(
-                    destination: OnboardingView(),
-                    isActive: $viewModel.gotToken
-                ) {
-                    EmptyView()
-                }
-                .hidden()
+            }
+            // Новый способ навигации: переход на OnboardingView при isAuthorized = true
+            .navigationDestination(isPresented: $viewModel.isAuthorized) {
+                OnboardingView()
             }
         }
     }
 }
 
-struct AuthView_Previews: PreviewProvider {
-    static var previews: some View {
-        AuthView(viewModel: AuthViewModel())
-    }
-}
 
 
 

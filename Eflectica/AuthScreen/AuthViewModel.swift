@@ -4,6 +4,7 @@
 //
 //  Created by Анна on 09.04.2025.
 //
+
 import Foundation
 
 final class AuthViewModel: ObservableObject {
@@ -11,11 +12,16 @@ final class AuthViewModel: ObservableObject {
         static let tokenKey = "token"
     }
 
-    @Published var gotToken: Bool =
-        KeychainService().getString(forKey: Const.tokenKey)?.isEmpty == false
+    @Published var isAuthorized: Bool
 
     private var worker = AuthWorker()
     private var keychain = KeychainService()
+
+    init() {
+        // Проверяем токен в keychain при запуске
+        let token = keychain.getString(forKey: Const.tokenKey)
+        self.isAuthorized = (token != nil && !token!.isEmpty)
+    }
 
     // MARK: – Sign Up
 
@@ -31,10 +37,6 @@ final class AuthViewModel: ObservableObject {
         guard let body = try? JSONEncoder().encode(requestData) else {
             print("Failed to encode signUp request")
             return
-        }
-        
-        if let json = try? JSONSerialization.jsonObject(with: body) {
-            print("signUp JSON:", json)
         }
 
         let request = Request(endpoint: endpoint, method: .post, body: body)
@@ -52,7 +54,7 @@ final class AuthViewModel: ObservableObject {
                     let token = response.jwt
                     self?.keychain.setString(token, forKey: Const.tokenKey)
                     DispatchQueue.main.async {
-                        self?.gotToken = true
+                        self?.isAuthorized = true
                     }
                     print("signUp successful, token:", token)
                 } catch {
@@ -67,11 +69,6 @@ final class AuthViewModel: ObservableObject {
     // MARK: – Sign In
 
     func signIn(email: String, password: String) {
-        // Сбросить gotToken, чтобы переход гарантированно сработал
-        DispatchQueue.main.async { [weak self] in
-            self?.gotToken = false
-        }
-
         let endpoint = AuthEndpoint.signin
 
         let userData = Signin.Request.UserData(
@@ -100,7 +97,7 @@ final class AuthViewModel: ObservableObject {
                     let token = response.jwt
                     self?.keychain.setString(token, forKey: Const.tokenKey)
                     DispatchQueue.main.async {
-                        self?.gotToken = true
+                        self?.isAuthorized = true
                     }
                     print("signIn successful, token:", token)
                 } catch {
@@ -134,6 +131,17 @@ final class AuthViewModel: ObservableObject {
             }
         }
     }
+
+    // MARK: – Logout
+
+    func logout() {
+        keychain.removeData(forKey: Const.tokenKey)
+        DispatchQueue.main.async {
+            self.isAuthorized = false
+        }
+    }
 }
+
+
 
 

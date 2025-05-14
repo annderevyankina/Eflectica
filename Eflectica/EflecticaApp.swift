@@ -8,20 +8,34 @@ import SwiftUI
 
 @main
 struct EflecticaApp: App {
+    @StateObject private var authViewModel = AuthViewModel()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @AppStorage("isLoggedIn") private var isLoggedIn = false
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if !isLoggedIn {
-                    AuthView(viewModel: AuthViewModel())
-                } else if !hasCompletedOnboarding {
-                    OnboardingView()
-                } else {
-                    MainScreenView(viewModel: MainScreenViewModel())
-                }
-            }
+            RootView()
+                .environmentObject(authViewModel)
         }
     }
 }
+
+struct RootView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+
+    var body: some View {
+        if !hasCompletedOnboarding {
+            OnboardingView()
+                .environmentObject(authViewModel)
+        } else if authViewModel.isAuthorized {
+            MainScreenView(viewModel: MainScreenViewModel())
+                .environmentObject(authViewModel)
+        } else {
+            AuthView(viewModel: authViewModel)
+                .environmentObject(authViewModel)
+        }
+    }
+}
+
+
+
