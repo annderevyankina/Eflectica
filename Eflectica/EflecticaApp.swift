@@ -1,4 +1,3 @@
-//
 //  EflecticaApp.swift
 //  Eflectica
 //
@@ -9,9 +8,20 @@ import SwiftUI
 
 @main
 struct EflecticaApp: App {
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Group {
+                if !isLoggedIn {
+                    AuthView(viewModel: AuthViewModel())
+                } else if !hasCompletedOnboarding {
+                    OnboardingView()
+                } else {
+                    MainScreenView(viewModel: MainScreenViewModel())
+                }
+            }
         }
     }
 }
