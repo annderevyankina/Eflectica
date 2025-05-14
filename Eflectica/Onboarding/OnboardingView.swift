@@ -10,68 +10,63 @@ import SwiftUI
 struct OnboardingView: View {
     @StateObject private var viewModel = OnboardingViewModel()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    
-    // Цвет из Assets.xcassets → "PrimaryBlue"
+
     private let primaryColor = Color("PrimaryBlue")
-    
+    private let greyColor = Color("Grey")
+
     var body: some View {
         NavigationStack {
             ZStack {
-                // Фон
-                Image("auth_background")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                
-                VStack {
-                    // Заголовок и подзаголовок
-                    VStack(spacing: 8) {
-                        Text(viewModel.currentItem.title)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(primaryColor)
-                        
-                        Text(viewModel.currentItem.subtitle)
-                            .font(.title2)
-                            .foregroundColor(primaryColor)
-                    }
-                    .padding(.top, 60)
-                    
-                    Spacer()
-                    
-                    // Изображение слайда
+                GeometryReader { geo in
                     Image(viewModel.currentItem.imageName)
                         .resizable()
-                        .scaledToFit()
-                        .padding(.horizontal, 30)
-                    
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                        .overlay(
+                            Image(viewModel.currentItem.imageName)
+                                .resizable()
+                                .frame(width: 1024, height: 102)
+                                .scaledToFill()
+                                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                                .clipped()
+                        )
+                        .ignoresSafeArea()
+                }
+
+                VStack {
+                    // Только title, subtitle убран
+                    Text(viewModel.currentItem.title)
+                        .font(.custom("BasisGrotesquePro-Medium", size: 32))
+                        .foregroundColor(primaryColor)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 60)
+
                     Spacer()
-                    
-                    // Индикатор и кнопки
+
                     VStack(spacing: 20) {
-                        // Точечный индикатор
                         HStack(spacing: 8) {
                             ForEach(viewModel.items.indices, id: \.self) { index in
                                 Circle()
                                     .fill(
                                         index == viewModel.currentIndex
                                             ? primaryColor
-                                            : Color.gray.opacity(0.5)
+                                            : greyColor.opacity(0.3)
                                     )
                                     .frame(width: 8, height: 8)
                             }
                         }
                         .padding(.bottom, 20)
-                        
-                        // Кнопки Пропустить / Далее-Начать
+
                         HStack {
                             Button("Пропустить онбординг") {
                                 completeOnboarding()
                             }
-                            .foregroundColor(.gray)
-                            
+                            .font(.custom("BasisGrotesquePro-Regular", size: 16))
+                            .foregroundColor(greyColor)
+
                             Spacer()
-                            
+
                             Button(viewModel.isLast ? "Начать" : "Далее") {
                                 if viewModel.isLast {
                                     completeOnboarding()
@@ -79,6 +74,7 @@ struct OnboardingView: View {
                                     viewModel.nextSlide()
                                 }
                             }
+                            .font(.custom("BasisGrotesquePro-Medium", size: 17))
                             .padding(.horizontal, 30)
                             .padding(.vertical, 12)
                             .background(primaryColor)
@@ -89,7 +85,7 @@ struct OnboardingView: View {
                         .padding(.bottom, 40)
                     }
                 }
-                
+
                 NavigationLink(
                     destination: MainScreenView(viewModel: MainScreenViewModel()),
                     isActive: $hasCompletedOnboarding
@@ -101,7 +97,7 @@ struct OnboardingView: View {
             .navigationBarBackButtonHidden(true)
         }
     }
-    
+
     private func completeOnboarding() {
         hasCompletedOnboarding = true
     }
@@ -112,3 +108,5 @@ struct OnboardingView_Previews: PreviewProvider {
         OnboardingView()
     }
 }
+
+

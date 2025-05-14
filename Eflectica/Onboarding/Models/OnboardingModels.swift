@@ -9,32 +9,34 @@ import Foundation
 struct OnboardingItem: Identifiable {
     let id = UUID()
     let title: String
-    let subtitle: String
     let imageName: String
+    let backgroundImageName: String
 }
 
 struct OnboardingData {
     static let items = [
         OnboardingItem(
-            title: "Находи эффекты",
-            subtitle: "и делись ими",
-            imageName: "onboarding1"
+            title: "Находи эффекты\nи делись ими",
+            imageName: "onboarding1",
+            backgroundImageName: "Onb1"
         ),
         OnboardingItem(
-            title: "Собирай эффекты",
-            subtitle: "и референсы в коллекции",
-            imageName: "onboarding2"
+            title: "Собирай эффекты\nи референсы в коллекции",
+            imageName: "onboarding2",
+            backgroundImageName: "Onb2"
         ),
         OnboardingItem(
-            title: "Подписывайся",
-            subtitle: "на чужие коллекции",
-            imageName: "onboarding3"
+            title: "Подписывайся\nна чужие коллекции",
+            imageName: "onboarding3",
+            backgroundImageName: "Onb3"
         ),
         OnboardingItem(
-            title: "Настраивай ленту",
-            subtitle: "под себя",
-            imageName: "onboarding4"
+            title: "Настраивай ленту\nпод себя",
+            imageName: "onboarding4",
+            backgroundImageName: "Onb4"
         )
     ]
 }
+
+
 
