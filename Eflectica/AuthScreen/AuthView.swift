@@ -20,8 +20,8 @@ struct AuthView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var showPassword = false
+    @State private var showConfirmPassword = false
 
-    // Цвета из ассетов
     private let primaryColor = Color("PrimaryBlue")
     private let greyColor = Color("Grey")
     private let textColor = Color("TextColor")
@@ -32,7 +32,6 @@ struct AuthView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Фон на весь экран
                 Image("AuthBackground")
                     .resizable()
                     .scaledToFill()
@@ -41,18 +40,19 @@ struct AuthView: View {
                 GeometryReader { geo in
                     ScrollView(showsIndicators: false) {
                         VStack {
-                            Spacer(minLength: max((geo.size.height - 420) / 2, 0)) // Центрирование по вертикали
+                            Spacer(minLength: max((geo.size.height - 480) / 2, 0))
 
                             VStack(spacing: 24) {
                                 // Заголовок
                                 Text(currentScreen == .login ? "Вход" : "Регистрация")
-                                    .font(.system(size: 32, weight: .bold))
+                                    .font(.custom("BasisGrotesquePro-Medium", size: 32))
                                     .foregroundColor(primaryColor)
                                     .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(.bottom, 12)
+                                    .padding(.bottom, 6)
 
                                 // Поля ввода
                                 VStack(spacing: 12) {
+                                    // Email
                                     TextField("Адрес почты", text: $email)
                                         .textInputAutocapitalization(.never)
                                         .disableAutocorrection(true)
@@ -62,11 +62,20 @@ struct AuthView: View {
                                         .cornerRadius(8)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)
-                                                .stroke(greyColor, lineWidth: 1)
+                                                .stroke(emailErrorColor, lineWidth: 1)
                                         )
                                         .foregroundColor(textColor)
-                                        .font(.system(size: 17))
+                                        .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                    // Сообщение об ошибке email (только если это не общая ошибка)
+                                    if let error = currentEmailError {
+                                        Text(error)
+                                            .foregroundColor(.red)
+                                            .font(.custom("BasisGrotesquePro-Regular", size: 13))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.leading, 4)
+                                    }
 
+                                    // Пароль
                                     ZStack(alignment: .trailing) {
                                         Group {
                                             if showPassword {
@@ -74,11 +83,13 @@ struct AuthView: View {
                                                     .textInputAutocapitalization(.never)
                                                     .disableAutocorrection(true)
                                                     .foregroundColor(textColor)
+                                                    .font(.custom("BasisGrotesquePro-Regular", size: 17))
                                             } else {
                                                 SecureField("Пароль", text: $password)
                                                     .textInputAutocapitalization(.never)
                                                     .disableAutocorrection(true)
                                                     .foregroundColor(textColor)
+                                                    .font(.custom("BasisGrotesquePro-Regular", size: 17))
                                             }
                                         }
                                         .padding(.vertical, 14)
@@ -87,9 +98,8 @@ struct AuthView: View {
                                         .cornerRadius(8)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)
-                                                .stroke(greyColor, lineWidth: 1)
+                                                .stroke(passwordErrorColor, lineWidth: 1)
                                         )
-                                        .font(.system(size: 17))
 
                                         Button {
                                             showPassword.toggle()
@@ -99,20 +109,68 @@ struct AuthView: View {
                                                 .padding(.trailing, 16)
                                         }
                                     }
+                                    // Сообщение об ошибке пароля (только если это не общая ошибка)
+                                    if let error = currentPasswordError {
+                                        Text(error)
+                                            .foregroundColor(.red)
+                                            .font(.custom("BasisGrotesquePro-Regular", size: 13))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.leading, 4)
+                                    }
 
+                                    // Подтверждение пароля (только при регистрации)
                                     if currentScreen == .register {
-                                        SecureField("Пароль еще раз", text: $confirmPassword)
+                                        ZStack(alignment: .trailing) {
+                                            Group {
+                                                if showConfirmPassword {
+                                                    TextField("Пароль еще раз", text: $confirmPassword)
+                                                        .textInputAutocapitalization(.never)
+                                                        .disableAutocorrection(true)
+                                                        .foregroundColor(textColor)
+                                                        .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                                } else {
+                                                    SecureField("Пароль еще раз", text: $confirmPassword)
+                                                        .textInputAutocapitalization(.never)
+                                                        .disableAutocorrection(true)
+                                                        .foregroundColor(textColor)
+                                                        .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                                }
+                                            }
                                             .padding(.vertical, 14)
                                             .padding(.horizontal, 16)
-                                            .foregroundColor(textColor)
                                             .background(whiteColor)
                                             .cornerRadius(8)
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(greyColor, lineWidth: 1)
+                                                    .stroke(confirmPasswordErrorColor, lineWidth: 1)
                                             )
-                                            .font(.system(size: 17))
+
+                                            Button {
+                                                showConfirmPassword.toggle()
+                                            } label: {
+                                                Image(systemName: showConfirmPassword ? "eye.slash" : "eye")
+                                                    .foregroundColor(greyColor)
+                                                    .padding(.trailing, 16)
+                                            }
+                                        }
+                                        // Сообщение об ошибке подтверждения пароля
+                                        if let error = viewModel.confirmPasswordError, !hasGeneralOrLoginError {
+                                            Text(error)
+                                                .foregroundColor(.red)
+                                                .font(.custom("BasisGrotesquePro-Regular", size: 13))
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .padding(.leading, 4)
+                                        }
                                     }
+                                }
+
+                                // Сообщения об ошибках входа/сервера - перед синей кнопкой
+                                if let error = loginOrGeneralError {
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                        .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                                        .multilineTextAlignment(.center)
+                                        .padding(.top, 12)
                                 }
 
                                 // Кнопки
@@ -122,7 +180,7 @@ struct AuthView: View {
                                             viewModel.signIn(email: email, password: password)
                                         } label: {
                                             Text("Войти")
-                                                .font(.system(size: 17, weight: .semibold))
+                                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
                                                 .foregroundColor(whiteColor)
                                                 .frame(maxWidth: .infinity)
                                                 .frame(height: 48)
@@ -134,10 +192,12 @@ struct AuthView: View {
                                             withAnimation {
                                                 currentScreen = .register
                                                 password = ""
+                                                confirmPassword = ""
+                                                viewModel.resetErrors()
                                             }
                                         } label: {
                                             Text("Зарегистрироваться")
-                                                .font(.system(size: 17, weight: .semibold))
+                                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
                                                 .foregroundColor(primaryColor)
                                                 .frame(maxWidth: .infinity)
                                                 .frame(height: 48)
@@ -150,14 +210,10 @@ struct AuthView: View {
                                         }
                                     } else {
                                         Button {
-                                            guard password == confirmPassword else {
-                                                print("Пароли не совпадают")
-                                                return
-                                            }
-                                            viewModel.signUp(email: email, password: password)
+                                            viewModel.signUp(email: email, password: password, confirmPassword: confirmPassword)
                                         } label: {
                                             Text("Зарегистрироваться")
-                                                .font(.system(size: 17, weight: .semibold))
+                                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
                                                 .foregroundColor(whiteColor)
                                                 .frame(maxWidth: .infinity)
                                                 .frame(height: 48)
@@ -170,10 +226,11 @@ struct AuthView: View {
                                                 currentScreen = .login
                                                 password = ""
                                                 confirmPassword = ""
+                                                viewModel.resetErrors()
                                             }
                                         } label: {
                                             Text("Войти")
-                                                .font(.system(size: 17, weight: .semibold))
+                                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
                                                 .foregroundColor(primaryColor)
                                                 .frame(maxWidth: .infinity)
                                                 .frame(height: 48)
@@ -203,14 +260,50 @@ struct AuthView: View {
                     .scrollDisabled(true)
                 }
             }
-            // Новый способ навигации: переход на OnboardingView при isAuthorized = true
             .navigationDestination(isPresented: $viewModel.isAuthorized) {
                 OnboardingView()
             }
         }
     }
+
+    // MARK: - Errors
+
+    private var loginOrGeneralError: String? {
+        if currentScreen == .login {
+            return viewModel.generalError ?? viewModel.loginAccountError
+        } else {
+            return viewModel.generalError
+        }
+    }
+
+    private var hasGeneralOrLoginError: Bool {
+        if currentScreen == .login {
+            return viewModel.generalError != nil || viewModel.loginAccountError != nil
+        } else {
+            return viewModel.generalError != nil
+        }
+    }
+
+    private var currentEmailError: String? {
+        if hasGeneralOrLoginError { return nil }
+        return viewModel.emailError
+    }
+
+    private var currentPasswordError: String? {
+        if hasGeneralOrLoginError { return nil }
+        return viewModel.passwordError
+    }
+
+    private var emailErrorColor: Color {
+        (currentEmailError != nil && !hasGeneralOrLoginError) ? .red : greyColor
+    }
+
+    private var passwordErrorColor: Color {
+        (currentPasswordError != nil && !hasGeneralOrLoginError) ? .red : greyColor
+    }
+
+    private var confirmPasswordErrorColor: Color {
+        (viewModel.confirmPasswordError != nil && !hasGeneralOrLoginError) ? .red : greyColor
+    }
 }
-
-
-
 
