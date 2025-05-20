@@ -75,7 +75,7 @@ struct OnboardingView: View {
                 .ignoresSafeArea(edges: .bottom)
 
                 NavigationLink(
-                    destination: MainScreenView(viewModel: MainScreenViewModel()),
+                    destination: MainScreenView(),
                     isActive: $hasCompletedOnboarding
                 ) {
                     EmptyView()

@@ -21,7 +21,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             // Главная
-            MainScreenView(viewModel: mainScreenViewModel)
+            MainScreenView()
                 .tabItem {
                     Image(selectedTab == 0 ? "mainIconActive" : "mainIcon")
                 }
@@ -42,7 +42,7 @@ struct MainTabView: View {
                 .tag(2)
 
             // Профиль
-            ProfileScreenView(viewModel: profileViewModel)
+            ProfileScreenView()
                 .tabItem {
                     Image(selectedTab == 3 ? "profileIconActive" : "profileIcon")
                 }
