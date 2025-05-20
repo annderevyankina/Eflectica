@@ -28,7 +28,7 @@ struct RootView: View {
             OnboardingView()
                 .environmentObject(authViewModel)
         } else if authViewModel.isAuthorized {
-            MainScreenView(viewModel: MainScreenViewModel())
+            MainTabView()
                 .environmentObject(authViewModel)
         } else {
             AuthView(viewModel: authViewModel)
@@ -36,6 +36,7 @@ struct RootView: View {
         }
     }
 }
+
 
 
 

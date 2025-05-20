@@ -25,7 +25,7 @@ struct AuthView: View {
     private let primaryColor = Color("PrimaryBlue")
     private let greyColor = Color("Grey")
     private let textColor = Color("TextColor")
-    private let whiteColor = Color("White")
+    private let whiteColor = Color("WhiteColor")
     private let formWidth: CGFloat = 340
     private let horizontalPadding: CGFloat = 16
 
