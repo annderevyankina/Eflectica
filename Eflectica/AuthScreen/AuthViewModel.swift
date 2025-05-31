@@ -15,7 +15,9 @@ final class AuthViewModel: ObservableObject {
         static let emailPattern = #"^[^@\s]+@[^@\s]+$"#
     }
 
+    // MARK: – Published для UI
     @Published var isAuthorized: Bool = false
+    @Published var token: String?                  // ← хранит JWT
 
     // Ошибки для отображения под инпутами
     @Published var emailError: String?
@@ -32,8 +34,10 @@ final class AuthViewModel: ObservableObject {
     private var keychain = KeychainService()
 
     init() {
-        let token = keychain.getString(forKey: Const.tokenKey)
-        self.isAuthorized = (token != nil && !token!.isEmpty)
+        // При старте читаем токен из Keychain
+        let savedToken = keychain.getString(forKey: Const.tokenKey)
+        self.token = savedToken
+        self.isAuthorized = (savedToken != nil && !savedToken!.isEmpty)
     }
 
     // MARK: – Проверка на пустое поле
@@ -94,7 +98,6 @@ final class AuthViewModel: ObservableObject {
         let endpoint = AuthEndpoint.signup
         let userData = Signup.Request.UserData(email: email, password: password)
         let requestData = Signup.Request(user: userData)
-
         guard let body = try? JSONEncoder().encode(requestData) else {
             print("Failed to encode signUp request")
             return
@@ -105,16 +108,14 @@ final class AuthViewModel: ObservableObject {
             switch result {
             case .failure(let error):
                 DispatchQueue.main.async {
-                    if let urlError = error as? URLError {
+                    if error is URLError {
                         self?.generalError = "Сервер не отвечает. Попробуйте позже"
-                        self?.emailError = nil
-                        self?.passwordError = nil
-                        self?.confirmPasswordError = nil
                     } else {
                         self?.emailError = "Ошибка регистрации. Попробуйте еще раз"
                     }
                 }
                 print("Network error (signUp):", error)
+
             case .success(let data):
                 guard let data = data else {
                     print("No data received in signUp response")
@@ -122,14 +123,17 @@ final class AuthViewModel: ObservableObject {
                 }
                 do {
                     let response = try JSONDecoder().decode(Signup.Response.self, from: data)
-                    let token = response.jwt
-                    self?.keychain.setString(token, forKey: Const.tokenKey)
+                    let jwt = response.jwt
+
+                    // Сохранение токена
+                    self?.keychain.setString(jwt, forKey: Const.tokenKey)
                     DispatchQueue.main.async {
+                        self?.token = jwt          // ← обновляем свойство
                         self?.isAuthorized = true
                     }
-                    print("signUp successful, token:", token)
+                    print("signUp successful, token:", jwt)
                 } catch {
-                    let raw = String(data: data, encoding: .utf8) ?? "<non-UTF8 data>"
+                    let raw = String(data: data, encoding: .utf8) ?? "<non-UTF8>"
                     DispatchQueue.main.async {
                         self?.emailError = "Ошибка регистрации. Попробуйте еще раз"
                     }
@@ -150,7 +154,6 @@ final class AuthViewModel: ObservableObject {
         let endpoint = AuthEndpoint.signin
         let userData = Signin.Request.UserData(email: email, password: password)
         let requestData = Signin.Request(user: userData)
-
         guard let body = try? JSONEncoder().encode(requestData) else {
             print("Failed to encode signIn request")
             return
@@ -161,7 +164,7 @@ final class AuthViewModel: ObservableObject {
             switch result {
             case .failure(let error):
                 DispatchQueue.main.async {
-                    if let urlError = error as? URLError {
+                    if error is URLError {
                         self?.generalError = "Сервер не отвечает. Попробуйте позже"
                         self?.loginAccountError = nil
                     } else {
@@ -169,6 +172,7 @@ final class AuthViewModel: ObservableObject {
                     }
                 }
                 print("Network error (signIn):", error)
+
             case .success(let data):
                 guard let data = data else {
                     print("No data received in signIn response")
@@ -176,16 +180,19 @@ final class AuthViewModel: ObservableObject {
                 }
                 do {
                     let response = try JSONDecoder().decode(Signin.Response.self, from: data)
-                    let token = response.jwt
-                    self?.keychain.setString(token, forKey: Const.tokenKey)
+                    let jwt = response.jwt
+
+                    // Сохранение токена
+                    self?.keychain.setString(jwt, forKey: Const.tokenKey)
                     DispatchQueue.main.async {
+                        self?.token = jwt          // ← обновляем свойство
                         self?.isAuthorized = true
                     }
-                    print("signIn successful, token:", token)
+                    print("signIn successful, token:", jwt)
                 } catch {
-                    let raw = String(data: data, encoding: .utf8) ?? "<non-UTF8 data>"
+                    let raw = String(data: data, encoding: .utf8) ?? "<non-UTF8>"
                     DispatchQueue.main.async {
-                        if raw.contains("Unauthorized") || raw.contains("Sign In Failed") || raw.contains("\"is_success\":false") {
+                        if raw.contains("Unauthorized") {
                             self?.loginAccountError = "Аккаунт не найден. Проверьте данные входа"
                         } else {
                             self?.generalError = "Сервер не отвечает. Попробуйте позже"
@@ -198,24 +205,19 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: – Get Users
+    // MARK: – Get Users (пример)
     func getUsers() {
-        let token = keychain.getString(forKey: Const.tokenKey) ?? ""
-        let request = Request(endpoint: AuthEndpoint.users(token: token))
+        let currentToken = keychain.getString(forKey: Const.tokenKey) ?? ""
+        let request = Request(endpoint: AuthEndpoint.users(token: currentToken),
+                              method: .get)
         worker.load(request: request) { result in
             switch result {
             case .failure(let error):
                 print("Network error (getUsers):", error)
             case .success(let data):
-                guard let data = data else {
-                    print("No data received in getUsers response")
-                    return
-                }
-                if let string = String(data: data, encoding: .utf8) {
-                    print("getUsers response:", string)
-                } else {
-                    print("Failed to decode getUsers data into a string")
-                }
+                guard let data = data,
+                      let str = String(data: data, encoding: .utf8) else { return }
+                print("getUsers response:", str)
             }
         }
     }
@@ -225,6 +227,7 @@ final class AuthViewModel: ObservableObject {
         keychain.removeData(forKey: Const.tokenKey)
         DispatchQueue.main.async {
             self.isAuthorized = false
+            self.token = nil               // ← очищаем токен
         }
     }
 
@@ -234,3 +237,4 @@ final class AuthViewModel: ObservableObject {
         case confirmPassword
     }
 }
+
