@@ -15,7 +15,7 @@ enum EffectRoute: Hashable {
 struct MainScreenView: View {
     @StateObject private var viewModel = MainScreenViewModel()
     @State private var route: EffectRoute?
-
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -25,68 +25,58 @@ struct MainScreenView: View {
                         .foregroundColor(Color("PrimaryBlue"))
                         .padding(.horizontal)
                         .padding(.top, 16)
-
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 20) {
                             ForEach(viewModel.topEffects) { effect in
-                                Button {
-                                    route = .effectDetail(id: effect.id)
-                                } label: {
+                                NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                                     EffectCardView(
+                                        id: effect.id,
                                         images: [effect.beforeImage.url, effect.afterImage.url],
-                                        title: effect.name,
-                                        tags: effect.programs.components(separatedBy: ","),
+                                        name: effect.name,
+                                        programs: effect.programList,
                                         rating: effect.averageRating,
                                         showRating: true
                                     )
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                         .padding(.horizontal)
                     }
-
-                    Text("Лента")
+                    
+                    Text("Новые эффекты")
                         .font(.custom("BasisGrotesquePro-Medium", size: 32))
                         .foregroundColor(Color("PrimaryBlue"))
                         .padding(.horizontal)
-
+                        .padding(.top, 16)
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 20) {
-                            ForEach(viewModel.feedEffects) { effect in
-                                Button {
-                                    route = .effectDetail(id: effect.id)
-                                } label: {
+                            ForEach(viewModel.newEffects) { effect in
+                                NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                                     EffectCardView(
+                                        id: effect.id,
                                         images: [effect.beforeImage.url, effect.afterImage.url],
-                                        title: effect.name,
-                                        tags: effect.programs.components(separatedBy: ","),
+                                        name: effect.name,
+                                        programs: effect.programList,
                                         rating: effect.averageRating,
-                                        showRating: false
+                                        showRating: true
                                     )
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                         .padding(.horizontal)
                     }
                 }
             }
-            .background(Color(.systemBackground))
-            .onAppear {
-                viewModel.loadEffects()
-            }
-            .navigationDestination(item: $route) { route in
+            .navigationDestination(for: EffectRoute.self) { route in
                 switch route {
                 case .effectDetail(let id):
-                    // Ищем эффект по id среди всех эффектов
-                    if let effect = (viewModel.topEffects + viewModel.feedEffects).first(where: { $0.id == id }) {
-                        EffectDetailView(effect: effect)
-                    } else {
-                        Text("Эффект не найден")
-                            .foregroundColor(.red)
-                    }
+                    EffectDetailView(viewModel: EffectDetailViewModel(effectId: id))
                 }
+            }
+            .onAppear {
+                viewModel.loadEffects()
             }
         }
     }

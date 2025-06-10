@@ -10,10 +10,11 @@ import SwiftUI
 private let greyColor = Color("Grey")
 
 struct EffectCardView: View {
+    let id: Int
     let images: [String]         
-    let title: String
-    let tags: [String]
-    let rating: Double?
+    let name: String
+    let programs: [String]
+    let rating: Double
     let showRating: Bool
 
     @State private var selectedImage = 0
@@ -51,32 +52,44 @@ struct EffectCardView: View {
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
 
             // Название эффекта
-            Text(title)
+            Text(name)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.primary)
                 .lineLimit(1)
                 .padding(.horizontal, 8)
 
-            // Теги и рейтинг
+            // Программы и рейтинг
             HStack(spacing: 8) {
-                ForEach(tags, id: \.self) { tag in
-                    Text(tag)
+                if !programs.isEmpty {
+                    Text(programs[0])
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Color("PrimaryBlue"))
                         .padding(.vertical, 2)
                         .padding(.horizontal, 8)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
+                    
+                    if programs.count > 1 {
+                        Text("+\(programs.count - 1)")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color("PrimaryBlue"))
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                    }
                 }
+                
                 Spacer()
-                if showRating, let rating = rating {
+                
+                if showRating {
                     HStack(spacing: 2) {
                         Image(systemName: "star.fill")
-                            .foregroundColor(.pink)
+                            .foregroundColor(.yellow)
                             .font(.system(size: 14))
                         Text(String(format: "%.1f", rating))
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.pink)
+                            .foregroundColor(.primary)
                     }
                 }
             }

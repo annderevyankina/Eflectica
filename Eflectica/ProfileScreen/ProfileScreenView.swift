@@ -48,7 +48,7 @@ struct ProfileScreenView: View {
 
                                 // Имя + edit
                                 HStack(spacing: 8) {
-                                    Text(user.username)
+                                    Text(user.name ?? "Пользователь")
                                         .font(.system(size: 32, weight: .bold))
                                     Image("editIcon")
                                         .resizable()

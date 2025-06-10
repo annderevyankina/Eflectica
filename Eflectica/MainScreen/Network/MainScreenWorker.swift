@@ -46,8 +46,38 @@ final class MainScreenWorker {
     
     func fetchEffectDetails(id: Int, completion: @escaping (Result<Effect, Error>) -> Void) {
         let request = Request(endpoint: MainScreenEndpoint.getEffectDetails(id: id), method: .get)
+        print("➡️ Отправка запроса деталей эффекта: \(request)")
         
         worker.executeRequest(with: request) { response in
+            switch response {
+            case .failure(let error):
+                print("❌ Ошибка сетевого запроса: \(error)")
+                completion(.failure(error))
+            case .success(let result):
+                if let httpResponse = result.response as? HTTPURLResponse {
+                    print("⬅️ Статус ответа: \(httpResponse.statusCode)")
+                    print("⬅️ Заголовки ответа: \(httpResponse.allHeaderFields)")
+                } else {
+                    print("⚠️ Нет HTTPURLResponse")
+                }
+                
+                guard let data = result.data else {
+                    print("❌ Данные не получены")
+                    completion(.failure(Networking.Error.emptyData))
+                    return
+                }
+                
+                print("⬅️ Получено сырых данных: \(String(data: data, encoding: .utf8) ?? "nil")")
+                
+                do {
+                    let effect = try JSONDecoder().decode(Effect.self, from: data)
+                    print("✅ Успешно декодированы детали эффекта")
+                    completion(.success(effect))
+                } catch {
+                    print("❌ Ошибка декодирования: \(error)")
+                    completion(.failure(error))
+                }
+            }
         }
     }
 }

@@ -8,9 +8,10 @@
 import SwiftUI
 import Foundation
 
-struct Effect: Identifiable, Decodable {
+struct Effect: Codable, Identifiable {
     let id: Int
     let name: String
+    let img: ImageData
     let description: String
     let speed: Int
     let platform: String
@@ -24,8 +25,7 @@ struct Effect: Identifiable, Decodable {
     let afterImage: ImageData
     
     enum CodingKeys: String, CodingKey {
-        case id, name, description, speed, platform, manual
-        case programs
+        case id, name, img, description, speed, platform, manual, programs
         case programVersion = "program_version"
         case categoryList = "category_list"
         case taskList = "task_list"
@@ -33,18 +33,21 @@ struct Effect: Identifiable, Decodable {
         case beforeImage = "before_image"
         case afterImage = "after_image"
     }
-}
-
-struct ImageData: Decodable {
-    let url: String
-    let q70: Q70Image
     
-    enum CodingKeys: String, CodingKey {
-        case url = "url"
-        case q70 = "q70"
+    var platformList: [String] {
+        platform.components(separatedBy: ",")
+    }
+    
+    var programList: [String] {
+        programs.components(separatedBy: ",")
     }
 }
 
-struct Q70Image: Decodable {
+struct ImageData: Codable {
+    let url: String
+    let q70: Q70Image
+}
+
+struct Q70Image: Codable {
     let url: String
 }
