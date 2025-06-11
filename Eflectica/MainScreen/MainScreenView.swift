@@ -32,11 +32,11 @@ struct MainScreenView: View {
                                 NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                                     EffectCardView(
                                         id: effect.id,
-                                        images: [effect.beforeImage.url, effect.afterImage.url],
+                                        images: [effect.afterImage.url, effect.beforeImage.url],
                                         name: effect.name,
                                         programs: effect.programList,
                                         rating: effect.averageRating,
-                                        showRating: true
+                                        isTopEffect: true
                                     )
                                 }
                             }
@@ -44,7 +44,7 @@ struct MainScreenView: View {
                         .padding(.horizontal)
                     }
                     
-                    Text("Новые эффекты")
+                    Text("Лента")
                         .font(.custom("BasisGrotesquePro-Medium", size: 32))
                         .foregroundColor(Color("PrimaryBlue"))
                         .padding(.horizontal)
@@ -56,11 +56,11 @@ struct MainScreenView: View {
                                 NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                                     EffectCardView(
                                         id: effect.id,
-                                        images: [effect.beforeImage.url, effect.afterImage.url],
+                                        images: [effect.afterImage.url, effect.beforeImage.url],
                                         name: effect.name,
                                         programs: effect.programList,
                                         rating: effect.averageRating,
-                                        showRating: true
+                                        isTopEffect: false
                                     )
                                 }
                             }
@@ -69,6 +69,7 @@ struct MainScreenView: View {
                     }
                 }
             }
+            .background(Color("LightGrey"))
             .navigationDestination(for: EffectRoute.self) { route in
                 switch route {
                 case .effectDetail(let id):

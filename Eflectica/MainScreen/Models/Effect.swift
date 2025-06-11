@@ -8,7 +8,7 @@
 import SwiftUI
 import Foundation
 
-struct Effect: Codable, Identifiable {
+struct Effect: Codable, Identifiable, Hashable {
     let id: Int
     let name: String
     let img: ImageData
@@ -41,13 +41,22 @@ struct Effect: Codable, Identifiable {
     var programList: [String] {
         programs.components(separatedBy: ",")
     }
+    
+    // MARK: - Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Effect, rhs: Effect) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
-struct ImageData: Codable {
+struct ImageData: Codable, Hashable {
     let url: String
     let q70: Q70Image
 }
 
-struct Q70Image: Codable {
+struct Q70Image: Codable, Hashable {
     let url: String
 }

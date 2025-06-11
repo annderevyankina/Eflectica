@@ -7,39 +7,57 @@
 
 import SwiftUI
 
-private let greyColor = Color("Grey")
-
 struct EffectCardView: View {
     let id: Int
     let images: [String]         
     let name: String
     let programs: [String]
     let rating: Double
-    let showRating: Bool
+    let isTopEffect: Bool
+    let isFullWidth: Bool
+    
+    private let greyColor = Color("Grey")
+    private let cornerRadius: CGFloat = 12
+    
+    init(id: Int, images: [String], name: String, programs: [String], rating: Double, isTopEffect: Bool, isFullWidth: Bool = false) {
+        self.id = id
+        self.images = images
+        self.name = name
+        self.programs = programs
+        self.rating = rating
+        self.isTopEffect = isTopEffect
+        self.isFullWidth = isFullWidth
+        _selectedImage = State(initialValue: 0)
+    }
 
-    @State private var selectedImage = 0
+    @State private var selectedImage: Int
+    
+    private var programModels: [Program] {
+        Program.findByIds(programs)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Слайдер изображений
+            // Image slider with before/after images
             TabView(selection: $selectedImage) {
                 ForEach(images.indices, id: \.self) { index in
                     AsyncImage(url: URL(string: images[index])) { phase in
                         switch phase {
                         case .empty:
                             ProgressView()
-                                .frame(width: 260, height: 180)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: isFullWidth ? 240 : 180)
                         case .success(let image):
                             image
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width: 260, height: 180)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: isFullWidth ? 240 : 180)
                                 .clipped()
-                                .cornerRadius(16, corners: [.topLeft, .topRight])
                         case .failure:
                             Color.gray
-                                .frame(width: 260, height: 180)
-                                .cornerRadius(16, corners: [.topLeft, .topRight])
+                                .frame(maxWidth: .infinity)
+                                .frame(height: isFullWidth ? 240 : 180)
                         @unknown default:
                             EmptyView()
                         }
@@ -47,66 +65,79 @@ struct EffectCardView: View {
                     .tag(index)
                 }
             }
-            .frame(width: 260, height: 180)
+            .frame(maxWidth: .infinity)
+            .frame(height: isFullWidth ? 240 : 180)
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            .id(id)
 
-            // Название эффекта
             Text(name)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: isFullWidth ? 17 : 14, weight: .medium))
                 .foregroundColor(.primary)
                 .lineLimit(1)
                 .padding(.horizontal, 8)
 
-            // Программы и рейтинг
             HStack(spacing: 8) {
-                if !programs.isEmpty {
-                    Text(programs[0])
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("PrimaryBlue"))
-                        .padding(.vertical, 2)
-                        .padding(.horizontal, 8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                    
-                    if programs.count > 1 {
-                        Text("+\(programs.count - 1)")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(Color("PrimaryBlue"))
-                            .padding(.vertical, 2)
-                            .padding(.horizontal, 8)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
+                if !programModels.isEmpty {
+                    if isTopEffect {
+                        // Display only program icons for top effects
+                        HStack(spacing: 8) {
+                            ForEach(programModels, id: \.name) { program in
+                                Image(program.iconName)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40, height: 40)
+                            }
+                        }
+                    } else {
+                        // Display icon and name for regular effects
+                        HStack(spacing: 8) {
+                            Image(programModels[0].iconName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                            
+                            if programModels.count == 1 {
+                                Text(programModels[0].name)
+                                    .font(.system(size: isFullWidth ? 17 : 14, weight: .medium))
+                                    .foregroundColor(.primary)
+                            }
+                        }
                     }
                 }
                 
                 Spacer()
                 
-                if showRating {
+                if isTopEffect || isFullWidth {
                     HStack(spacing: 2) {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                            .font(.system(size: 14))
+                        Image("starIcon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: isFullWidth ? 28 : 14, height: isFullWidth ? 28 : 14)
                         Text(String(format: "%.1f", rating))
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.primary)
+                            .font(.system(size: isFullWidth ? 17 : 14, weight: .medium))
+                            .foregroundColor(Color("PinkColor"))
                     }
                 }
             }
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
         }
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         .background(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(greyColor, lineWidth: 2)
-                .background(Color.white.cornerRadius(20))
+                .background(Color.white.cornerRadius(cornerRadius))
         )
-        .frame(width: 260)
+        .frame(width: isFullWidth ? nil : 260)
         .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+        .onAppear {
+            selectedImage = 0
+        }
     }
 }
 
-// MARK: - CornerRadius для отдельных углов
+// Helper extension for applying corner radius to specific corners
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
