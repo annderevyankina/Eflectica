@@ -10,7 +10,7 @@ import Foundation
 enum MainScreenEndpoint: Endpoint {
     case getAllEffects
     case getEffectDetails(id: Int)
-    case getEffectComments(id: Int)
+    case getEffectComments(id: Int, token: String?)
 
     var compositePath: String {
         switch self {
@@ -18,13 +18,22 @@ enum MainScreenEndpoint: Endpoint {
             return "/api/v1/effects"
         case .getEffectDetails(let id):
             return "/api/v1/effects/\(id)"
-        case .getEffectComments(let id):
+        case .getEffectComments(let id, _):
             return "/api/v1/effects/\(id)/comments"
         }
     }
 
     var headers: [String: String] {
-        return ["Content-Type": "application/json"]
+        var h = ["Content-Type": "application/json"]
+        switch self {
+        case .getEffectComments(_, let token):
+            if let token = token {
+                h["Authorization"] = "Bearer \(token)"
+            }
+        default:
+            break
+        }
+        return h
     }
 }
 

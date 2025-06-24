@@ -10,6 +10,7 @@ import SwiftUI
 
 @MainActor
 class EffectDetailViewModel: ObservableObject {
+    @ObservedObject var authViewModel: AuthViewModel
     @Published var effectCard: EffectCardViewModel?
     @Published var isLoading = false
     @Published var error: Error?
@@ -18,8 +19,9 @@ class EffectDetailViewModel: ObservableObject {
     private let worker = MainScreenWorker()
     private let effectId: Int
     
-    init(effectId: Int) {
+    init(effectId: Int, authViewModel: AuthViewModel) {
         self.effectId = effectId
+        self.authViewModel = authViewModel
     }
     
     func fetchEffectDetails() {
@@ -54,8 +56,8 @@ class EffectDetailViewModel: ObservableObject {
     }
     
     func fetchComments() {
-        print("[EffectDetailViewModel] fetchComments started for id: \(effectId)")
-        worker.fetchEffectComments(id: effectId) { [weak self] result in
+        print("[EffectDetailViewModel] fetchComments started for id: \(effectId), token: \(authViewModel.token ?? "nil")")
+        worker.fetchEffectComments(id: effectId, token: authViewModel.token) { [weak self] result in
             Task { @MainActor in
                 switch result {
                 case .success(let comments):

@@ -35,11 +35,11 @@ enum ProfileScreenEndpoint: Endpoint {
         case .getAllUsers:
             break
         case .getUser(_, let token), .getCurrentUser(let token):
-            h["Authorization"] = token
+            h["Authorization"] = "Bearer \(token)"
         case .patchProfile(let token):
-            h["Authorization"] = token
+            h["Authorization"] = "Bearer \(token)"
         case .deleteProfile(let token):
-            h["Authorization"] = token
+            h["Authorization"] = "Bearer \(token)"
         }
         return h
     }

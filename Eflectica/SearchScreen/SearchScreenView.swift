@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SearchScreenView: View {
     @StateObject var viewModel: SearchScreenViewModel
+    @EnvironmentObject private var authViewModel: AuthViewModel
     
     private let primaryBlue = Color("PrimaryBlue")
     private let textColor = Color("TextColor")
@@ -110,7 +111,7 @@ struct SearchScreenView: View {
                 .navigationDestination(for: EffectRoute.self) { route in
                     switch route {
                     case .effectDetail(let id):
-                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id))
+                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel))
                     }
                 }
                 .navigationDestination(for: CategoryRoute.self) { route in

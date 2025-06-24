@@ -295,7 +295,7 @@ struct MainScreenView: View {
                 .navigationDestination(for: EffectRoute.self) { route in
                     switch route {
                     case .effectDetail(let id):
-                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id))
+                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel))
                     }
                 }
                 .onAppear {

@@ -92,80 +92,123 @@ struct EffectDetailView: View {
                                 )
                                 .cornerRadius(8)
                         }
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 20)
-                    // Автор
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Автор эффекта")
-                            .font(.custom("BasisGrotesquePro-Medium", size: 15))
-                            .foregroundColor(textColor)
-                        HStack(spacing: 8) {
-                            EffectAvatarView(url: effectCard.authorAvatarUrl)
-                                .frame(width: 32, height: 32)
-                            Text("@" + effectCard.authorUsername)
-                                .font(.custom("BasisGrotesquePro-Regular", size: 16))
-                                .foregroundColor(darkGrey)
-                            Spacer()
+                        Button(action: { isShareSheetPresented = true }) {
+                            Image(systemName: "square.and.arrow.up")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 22, height: 22)
+                                .foregroundColor(primaryBlue)
+                                .padding(12)
+                                .background(Color.white)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(primaryBlue, lineWidth: 2)
+                                )
+                                .cornerRadius(8)
                         }
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
-                    // Рейтинг
-                    if effectCard.averageRating > 0 {
-                        HStack {
-                            Spacer()
+                    // Автор и рейтинг
+                    HStack(alignment: .center, spacing: 24) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Автор эффекта")
+                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                                .foregroundColor(textColor)
+                            HStack(spacing: 12) {
+                                EffectAvatarView(url: effectCard.authorAvatarUrl)
+                                    .frame(width: 56, height: 56)
+                                Text("@" + effectCard.authorUsername)
+                                    .font(.custom("BasisGrotesquePro-Medium", size: 18))
+                                    .foregroundColor(darkGrey)
+                            }
+                        }
+                        Spacer()
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Рейтинг")
+                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                                .foregroundColor(textColor)
                             HStack(spacing: 4) {
                                 Image("starIcon")
                                     .resizable()
-                                    .frame(width: 20, height: 20)
+                                    .frame(width: 24, height: 24)
                                 Text(effectCard.formattedRating)
-                                    .font(.custom("BasisGrotesquePro-Medium", size: 22))
+                                    .font(.custom("BasisGrotesquePro-Medium", size: 24))
                                     .foregroundColor(pinkColor)
                             }
+                            Text("На основе 32 оценок")
+                                .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                                .foregroundColor(.black)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 20)
                     }
-                    // Категория (только первая)
-                    if let firstCategoryId = effectCard.categoryList.first,
-                       let categoryName = categoryDescriptions[firstCategoryId] {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Категория")
-                                .font(.custom("BasisGrotesquePro-Medium", size: 15))
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                    // Подойдёт для
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Подойдёт для")
+                            .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                            .foregroundColor(textColor)
+                        HStack(spacing: 12) {
+                            Image("lrIcon")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                            Text("Lightroom версии 2.0.0")
+                                .font(.custom("BasisGrotesquePro-Regular", size: 16))
                                 .foregroundColor(textColor)
+                        }
+                        HStack(spacing: 12) {
+                            Image("psIcon")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                            Text("Photoshop версии 21.0.0")
+                                .font(.custom("BasisGrotesquePro-Regular", size: 16))
+                                .foregroundColor(textColor)
+                        }
+                        HStack(spacing: 8) {
+                            Image(systemName: "windows")
+                                .resizable()
+                                .frame(width: 28, height: 28)
+                                .foregroundColor(.black)
+                            Image(systemName: "applelogo")
+                                .resizable()
+                                .frame(width: 28, height: 28)
+                                .foregroundColor(.black)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                    // Категория
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Категория")
+                            .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                            .foregroundColor(textColor)
+                        if let firstCategoryId = effectCard.categoryList.first,
+                           let categoryName = categoryDescriptions[firstCategoryId] {
                             NavigationLink(value: CategoryRoute.category(category: Category(id: firstCategoryId, name: categoryName))) {
-                                HStack(spacing: 6) {
-                                    Text(categoryName)
-                                        .font(.custom("BasisGrotesquePro-Regular", size: 15))
-                                        .foregroundColor(primaryBlue)
-                                    Image("moreIcon")
-                                        .resizable()
-                                        .frame(width: 16, height: 16)
-                                        .foregroundColor(primaryBlue)
-                                }
+                                Text(categoryName + "  >>")
+                                    .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                    .foregroundColor(primaryBlue)
                             }
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 8)
                     }
-                    // Задачи (все)
-                    if !effectCard.categoryList.isEmpty {
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                    // Задачи
+                    let tasks = effectCard.categoryList
+                    if !tasks.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Задачи")
-                                .font(.custom("BasisGrotesquePro-Medium", size: 15))
+                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
                                 .foregroundColor(textColor)
-                            WrapHStack(items: effectCard.categoryList) { taskId in
-                                Group {
-                                    if let task = allTasks.first(where: { $0.id == taskId }) {
-                                        Text(task.title)
-                                            .font(.custom("BasisGrotesquePro-Regular", size: 14))
-                                            .foregroundColor(primaryBlue)
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 4)
-                                            .background(tagGrey)
-                                            .cornerRadius(6)
-                                    }
+                            ForEach(tasks, id: \.self) { taskId in
+                                if let task = allTasks.first(where: { $0.id == taskId }) {
+                                    Text(task.title)
+                                        .font(.custom("BasisGrotesquePro-Regular", size: 16))
+                                        .foregroundColor(.black)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color(.systemGray5))
+                                        .cornerRadius(6)
                                 }
                             }
                         }
@@ -199,8 +242,8 @@ struct EffectDetailView: View {
                     // Инструкция
                     if let manual = effectCard.manual, !manual.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Инструкция по использованию")
-                                .font(.custom("BasisGrotesquePro-Medium", size: 15))
+                            Text("Инструкция")
+                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
                                 .foregroundColor(textColor)
                             ForEach(manual.split(separator: "\n").enumerated().map({ $0 }), id: \ .offset) { idx, step in
                                 HStack(alignment: .top, spacing: 8) {

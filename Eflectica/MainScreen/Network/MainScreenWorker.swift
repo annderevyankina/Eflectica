@@ -81,8 +81,8 @@ final class MainScreenWorker {
         }
     }
 
-    func fetchEffectComments(id: Int, completion: @escaping (Result<[Comment], Error>) -> Void) {
-        let request = Request(endpoint: MainScreenEndpoint.getEffectComments(id: id), method: .get)
+    func fetchEffectComments(id: Int, token: String?, completion: @escaping (Result<[Comment], Error>) -> Void) {
+        let request = Request(endpoint: MainScreenEndpoint.getEffectComments(id: id, token: token), method: .get)
         print("➡️ Отправка запроса комментариев: \(request)")
         worker.executeRequest(with: request) { response in
             switch response {
