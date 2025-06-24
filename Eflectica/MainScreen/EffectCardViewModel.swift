@@ -43,11 +43,11 @@ class EffectCardViewModel: ObservableObject {
         EffectCardViewModel(
             name: effect.name,
             description: effect.description,
-            beforeImageUrl: effect.beforeImage.url,
-            afterImageUrl: effect.afterImage.url,
-            averageRating: effect.averageRating,
-            programs: effect.programList,
-            categoryList: effect.categoryList
+            beforeImageUrl: effect.beforeImage?.url ?? "",
+            afterImageUrl: effect.afterImage?.url ?? "",
+            averageRating: effect.averageRating ?? 0,
+            programs: effect.programs?.map { $0.name } ?? [],
+            categoryList: effect.categories ?? []
         )
     }
 } 

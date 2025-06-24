@@ -47,21 +47,13 @@ struct RootView: View {
 }
 
 struct ContentView: View {
-    @EnvironmentObject var authViewModel: AuthViewModel
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     var body: some View {
-        Group {
-            if !hasCompletedOnboarding {
-                OnboardingView()
-                    .environmentObject(authViewModel)
-            } else if authViewModel.isAuthorized {
-                MainTabView()
-                    .environmentObject(authViewModel)
-            } else {
-                AuthView(viewModel: authViewModel)
-                    .environmentObject(authViewModel)
-            }
+        if !hasCompletedOnboarding {
+            OnboardingView()
+        } else {
+            MainTabView()
         }
     }
 }

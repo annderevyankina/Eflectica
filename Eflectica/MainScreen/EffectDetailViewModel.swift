@@ -13,6 +13,7 @@ class EffectDetailViewModel: ObservableObject {
     @Published var effectCard: EffectCardViewModel?
     @Published var isLoading = false
     @Published var error: Error?
+    @Published var comments: [CommentCardViewModel] = []
     
     private let worker = MainScreenWorker()
     private let effectId: Int
@@ -34,11 +35,11 @@ class EffectDetailViewModel: ObservableObject {
                     self?.effectCard = EffectCardViewModel(
                         name: effect.name,
                         description: effect.description,
-                        beforeImageUrl: effect.beforeImage.url,
-                        afterImageUrl: effect.afterImage.url,
-                        averageRating: effect.averageRating,
-                        programs: effect.programList,
-                        categoryList: effect.categoryList
+                        beforeImageUrl: effect.beforeImage?.url ?? "",
+                        afterImageUrl: effect.afterImage?.url ?? "",
+                        averageRating: effect.averageRating ?? 0,
+                        programs: effect.programs?.map { $0.name } ?? [],
+                        categoryList: effect.categories ?? []
                     )
                 case .failure(let error):
                     self?.error = error
@@ -46,4 +47,16 @@ class EffectDetailViewModel: ObservableObject {
             }
         }
     }
+    
+    func loadMoreComments() {
+        // TODO: Реализовать подгрузку комментариев с сервера
+    }
+}
+
+struct EffectCommentViewModel: Identifiable {
+    let id: Int
+    let username: String
+    let avatarUrl: String
+    let text: String
+    let dateString: String
 } 

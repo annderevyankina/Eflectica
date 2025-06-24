@@ -80,5 +80,38 @@ final class MainScreenWorker {
             }
         }
     }
+
+    func fetchEffectComments(id: Int, completion: @escaping (Result<[Comment], Error>) -> Void) {
+        let request = Request(endpoint: MainScreenEndpoint.getEffectComments(id: id), method: .get)
+        print("➡️ Отправка запроса комментариев: \(request)")
+        worker.executeRequest(with: request) { response in
+            switch response {
+            case .failure(let error):
+                print("❌ Ошибка сетевого запроса: \(error)")
+                completion(.failure(error))
+            case .success(let result):
+                if let httpResponse = result.response as? HTTPURLResponse {
+                    print("⬅️ Статус ответа: \(httpResponse.statusCode)")
+                    print("⬅️ Заголовки ответа: \(httpResponse.allHeaderFields)")
+                } else {
+                    print("⚠️ Нет HTTPURLResponse")
+                }
+                guard let data = result.data else {
+                    print("❌ Данные не получены")
+                    completion(.failure(Networking.Error.emptyData))
+                    return
+                }
+                print("⬅️ Получено сырых данных: \(String(data: data, encoding: .utf8) ?? "nil")")
+                do {
+                    let comments = try JSONDecoder().decode([Comment].self, from: data)
+                    print("✅ Успешно декодировано комментариев: \(comments.count)")
+                    completion(.success(comments))
+                } catch {
+                    print("❌ Ошибка декодирования: \(error)")
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
 }
 

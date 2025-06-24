@@ -71,12 +71,12 @@ class SearchScreenViewModel: ObservableObject {
                 }
                 
                 // Search in programs
-                if effect.programList.contains(where: { $0.lowercased().contains(lowercasedQuery) }) {
+                if (effect.programs?.map { $0.name } ?? []).contains(where: { $0.lowercased().contains(lowercasedQuery) }) {
                     return true
                 }
                 
                 // Search in categories
-                if effect.categoryList.contains(where: { $0.lowercased().contains(lowercasedQuery) }) {
+                if (effect.categories ?? []).contains(where: { $0.lowercased().contains(lowercasedQuery) }) {
                     return true
                 }
                 
@@ -86,7 +86,7 @@ class SearchScreenViewModel: ObservableObject {
         }
         
         // Remove duplicates and sort by rating
-        searchResults = Array(Set(results)).sorted(by: { $0.averageRating > $1.averageRating })
+        searchResults = Array(Set(results)).sorted(by: { ($0.averageRating ?? 0) > ($1.averageRating ?? 0) })
     }
     
     // Пример метода, который может изменять данные
@@ -114,7 +114,7 @@ class SearchScreenViewModel: ObservableObject {
                     
                     // Distribute effects by categories
                     for effect in effects {
-                        for category in effect.categoryList {
+                        for category in effect.categories ?? [] {
                             if let _ = groupedEffects[category] {
                                 groupedEffects[category]?.append(effect)
                             }

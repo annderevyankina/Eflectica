@@ -18,4 +18,17 @@ struct Category: Identifiable, Hashable {
     static func == (lhs: Category, rhs: Category) -> Bool {
         lhs.id == rhs.id
     }
-} 
+}
+
+let categoryDescriptions: [String: String] = [
+    "photoProcessing": "Обработка фото",
+    "3dGrafics": "3D-графика",
+    "motion": "Моушен",
+    "illustration": "Иллюстрация",
+    "animation": "Анимация",
+    "uiux": "UI/UX-анимация",
+    "videoProcessing": "Обработка видео",
+    "vfx": "VFX",
+    "gamedev": "Геймдев",
+    "arvr": "AR & VR"
+] 

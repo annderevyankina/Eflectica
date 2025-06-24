@@ -15,88 +15,76 @@ struct OnboardingView: View {
     private let greyColor = Color("DarkGrey")
 
     var body: some View {
-        NavigationStack {
+        ZStack {
             ZStack {
-                ZStack {
-                    Image(viewModel.currentItem.backgroundImageName)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                        .clipped()
-                        .ignoresSafeArea()
-                }
-
-                VStack {
-                    Text(viewModel.currentItem.title)
-                        .font(.custom("BasisGrotesquePro-Medium", size: 32))
-                        .foregroundColor(primaryColor)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity, alignment: .top)
-                        .padding(.top, 100)
-
-                    Spacer()
-
-                    if viewModel.isLast {
-                        Button("Начать") {
+                Image(viewModel.currentItem.backgroundImageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .clipped()
+                    .ignoresSafeArea()
+            }
+            VStack {
+                Text(viewModel.currentItem.title)
+                    .font(.custom("BasisGrotesquePro-Medium", size: 32))
+                    .foregroundColor(primaryColor)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.top, 100)
+                Spacer()
+                if viewModel.isLast {
+                    Button(action: {
+                        completeOnboarding()
+                    }) {
+                        Text("Начать")
+                            .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 64)
+                            .padding(.vertical, 12)
+                            .background(primaryColor)
+                            .cornerRadius(6)
+                    }
+                    .padding(.bottom, 60)
+                } else {
+                    VStack(spacing: 20) {
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.items.indices, id: \.self) { index in
+                                Circle()
+                                    .fill(
+                                        index == viewModel.currentIndex
+                                            ? primaryColor
+                                            : greyColor.opacity(0.3)
+                                    )
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
+                        Button("Пропустить онбординг") {
                             completeOnboarding()
                         }
-                        .font(.custom("BasisGrotesquePro-Medium", size: 17))
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 12)
-                        .background(primaryColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .padding(.bottom, 60)
-                    } else {
-                        VStack(spacing: 20) {
-                            HStack(spacing: 8) {
-                                ForEach(viewModel.items.indices, id: \.self) { index in
-                                    Circle()
-                                        .fill(
-                                            index == viewModel.currentIndex
-                                                ? primaryColor
-                                                : greyColor.opacity(0.3)
-                                        )
-                                        .frame(width: 8, height: 8)
-                                }
-                            }
-
-                            Button("Пропустить онбординг") {
-                                completeOnboarding()
-                            }
-                            .font(.custom("BasisGrotesquePro-Regular", size: 16))
-                            .foregroundColor(greyColor)
-                        }
-                        .padding(.bottom, 60)
+                        .font(.custom("BasisGrotesquePro-Regular", size: 16))
+                        .foregroundColor(greyColor)
                     }
+                    .padding(.bottom, 60)
                 }
-
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea(edges: .bottom)
-
-                NavigationLink(
-                    destination: MainScreenView(),
-                    isActive: $hasCompletedOnboarding
-                ) {
-                    EmptyView()
-                }
-                .hidden()
             }
-            .navigationBarBackButtonHidden(true)
-            .gesture(
-                DragGesture()
-                    .onEnded { value in
-                        // Свайп влево - следующий слайд
-                        if value.translation.width < -50, viewModel.currentIndex < viewModel.items.count - 1 {
-                            withAnimation { viewModel.currentIndex += 1 }
-                        }
-                        // Свайп вправо - предыдущий слайд
-                        if value.translation.width > 50, viewModel.currentIndex > 0 {
-                            withAnimation { viewModel.currentIndex -= 1 }
-                        }
-                    }
-            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(edges: .bottom)
         }
+        .navigationBarBackButtonHidden(true)
+        .gesture(
+            DragGesture()
+                .onEnded { value in
+                    // Свайп влево - следующий слайд
+                    if value.translation.width < -50, viewModel.currentIndex < viewModel.items.count - 1 {
+                        withAnimation { viewModel.currentIndex += 1 }
+                    }
+                    // Свайп вправо - предыдущий слайд
+                    if value.translation.width > 50, viewModel.currentIndex > 0 {
+                        withAnimation { viewModel.currentIndex -= 1 }
+                    }
+                }
+        )
+        .toolbar(.hidden, for: .tabBar)
     }
 
     private func completeOnboarding() {

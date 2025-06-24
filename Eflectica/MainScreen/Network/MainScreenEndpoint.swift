@@ -1,5 +1,5 @@
 //
-//  Untitled.swift
+//  MainScreenEndpoint.swift
 //  Eflectica
 //
 //  Created by Анна on 18.05.2025.
@@ -10,6 +10,7 @@ import Foundation
 enum MainScreenEndpoint: Endpoint {
     case getAllEffects
     case getEffectDetails(id: Int)
+    case getEffectComments(id: Int)
 
     var compositePath: String {
         switch self {
@@ -17,6 +18,8 @@ enum MainScreenEndpoint: Endpoint {
             return "/api/v1/effects"
         case .getEffectDetails(let id):
             return "/api/v1/effects/\(id)"
+        case .getEffectComments(let id):
+            return "/api/v1/effects/\(id)/comments"
         }
     }
 

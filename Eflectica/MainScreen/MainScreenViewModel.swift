@@ -47,8 +47,8 @@ class MainScreenViewModel: ObservableObject {
     // Фильтрация топовых эффектов по рейтингу
     private func filterTopEffects(_ effects: [Effect]) -> [Effect] {
         return effects
-            .filter { $0.averageRating >= 4.0 }
-            .sorted(by: { $0.averageRating > $1.averageRating })
+            .filter { ($0.averageRating ?? 0) >= 4.0 }
+            .sorted(by: { ($0.averageRating ?? 0) > ($1.averageRating ?? 0) })
             .prefix(5)
             .map { $0 }
     }

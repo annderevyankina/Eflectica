@@ -27,46 +27,30 @@ struct CategoryView: View {
                     .padding(.top, 16)
                 
                 // Sort and Filter buttons
-                HStack(spacing: 16) {
+                HStack(spacing: 8) {
                     Button(action: {
                         // Sort action
                     }) {
-                        HStack(spacing: 8) {
-                            Image("sortIcon")
-                                .renderingMode(.template)
-                                .foregroundStyle(textColor)
-                            Text("Сортировка")
-                                .font(.custom("BasisGrotesquePro-Regular", size: 15))
-                                .foregroundStyle(textColor)
-                        }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(greyColor, lineWidth: 2)
-                                .background(Color("WhiteColor").cornerRadius(8))
-                        )
+                        Image("sortIcon")
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(10)
+                            .foregroundStyle(textColor)
                     }
+                    .buttonStyle(IconSquareButtonStyle())
                     
                     Button(action: {
                         showingFilterSheet = true
                     }) {
-                        HStack(spacing: 8) {
-                            Image("filterIcon")
-                                .renderingMode(.template)
-                                .foregroundStyle(textColor)
-                            Text("Фильтры")
-                                .font(.custom("BasisGrotesquePro-Regular", size: 15))
-                                .foregroundStyle(textColor)
-                        }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(greyColor, lineWidth: 2)
-                                .background(Color("WhiteColor").cornerRadius(8))
-                        )
+                        Image("filterIcon")
+                            .renderingMode(.template)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(10)
+                            .foregroundStyle(textColor)
                     }
+                    .buttonStyle(IconSquareButtonStyle())
                 }
                 .padding(.horizontal)
                 
@@ -76,10 +60,10 @@ struct CategoryView: View {
                         NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                             EffectCardView(
                                 id: effect.id,
-                                images: [effect.afterImage.url, effect.beforeImage.url],
+                                images: [effect.afterImage?.url ?? "", effect.beforeImage?.url ?? ""],
                                 name: effect.name,
-                                programs: effect.programList,
-                                rating: effect.averageRating,
+                                programs: effect.programs?.map { $0.name } ?? [],
+                                rating: effect.averageRating ?? 0,
                                 isTopEffect: false,
                                 isFullWidth: true
                             )
@@ -94,5 +78,23 @@ struct CategoryView: View {
         .sheet(isPresented: $showingFilterSheet) {
             FilterView()
         }
+    }
+}
+
+struct IconSquareButtonStyle: ButtonStyle {
+    var borderColor: Color = Color("Grey")
+    var backgroundColor: Color = Color("WhiteColor")
+    var cornerRadius: CGFloat = 6
+    var size: CGFloat = 42
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(width: size, height: size)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(borderColor, lineWidth: 2)
+                    .background(backgroundColor.cornerRadius(cornerRadius))
+            )
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }
 } 

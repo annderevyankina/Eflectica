@@ -18,9 +18,9 @@ final class EditProfileViewModel: ObservableObject {
     private let worker = ProfileScreenWorker()
     
     func loadUserData(_ user: User) {
-        username = user.username
-        bio = user.bio
-        contact = user.contact
+        username = user.username ?? ""
+        bio = user.bio ?? ""
+        contact = user.contact ?? ""
         portfolio = user.portfolio ?? ""
     }
     

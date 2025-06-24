@@ -16,88 +16,101 @@ struct SearchScreenView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
-                Text("Категории")
-                    .font(.custom("BasisGrotesquePro-Medium", size: 32))
-                    .foregroundStyle(primaryBlue)
-                    .padding(.horizontal)
-                    .padding(.top, 16)
-                
-                // Search Bar
-                HStack(spacing: 12) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(greyColor)
-                    
-                    TextField("Поиск эффектов", text: $viewModel.searchText)
+            if let error = viewModel.error {
+                VStack {
+                    Spacer()
+                    Text("Не можем загрузить данные. Проверьте подключение к интернету")
                         .font(.custom("BasisGrotesquePro-Regular", size: 17))
-                        .foregroundColor(textColor)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                    Spacer()
                 }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(greyColor, lineWidth: 2)
-                        .background(Color.white.cornerRadius(8))
-                )
-                .padding(.horizontal)
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 32) {
-                        if viewModel.searchText.isEmpty {
-                            // Show all categories when search is empty
-                            ForEach(viewModel.categories) { category in
-                                CategorySection(
-                                    category: category,
-                                    effects: viewModel.effectsByCategory[category.id] ?? []
-                                )
-                            }
-                        } else {
-                            // Show search results
-                            if viewModel.searchResults.isEmpty {
-                                Text("Ничего не найдено")
-                                    .font(.custom("BasisGrotesquePro-Regular", size: 17))
-                                    .foregroundColor(greyColor)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(.top, 32)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color("LightGrey").ignoresSafeArea())
+            } else {
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("Категории")
+                        .font(.custom("BasisGrotesquePro-Medium", size: 32))
+                        .foregroundStyle(primaryBlue)
+                        .padding(.horizontal)
+                        .padding(.top, 16)
+                    
+                    // Search Bar
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(greyColor)
+                        
+                        TextField("Поиск эффектов", text: $viewModel.searchText)
+                            .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                            .foregroundColor(textColor)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(greyColor, lineWidth: 2)
+                            .background(Color.white.cornerRadius(8))
+                    )
+                    .padding(.horizontal)
+                    
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 32) {
+                            if viewModel.searchText.isEmpty {
+                                // Show all categories when search is empty
+                                ForEach(viewModel.categories) { category in
+                                    CategorySection(
+                                        category: category,
+                                        effects: viewModel.effectsByCategory[category.id] ?? []
+                                    )
+                                }
                             } else {
-                                LazyVStack(spacing: 16) {
-                                    ForEach(viewModel.searchResults) { effect in
-                                        NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
-                                            EffectCardView(
-                                                id: effect.id,
-                                                images: [effect.afterImage.url, effect.beforeImage.url],
-                                                name: effect.name,
-                                                programs: effect.programList,
-                                                rating: effect.averageRating,
-                                                isTopEffect: false,
-                                                isFullWidth: true
-                                            )
+                                // Show search results
+                                if viewModel.searchResults.isEmpty {
+                                    Text("Ничего не найдено")
+                                        .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                        .foregroundColor(greyColor)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.top, 32)
+                                } else {
+                                    LazyVStack(spacing: 16) {
+                                        ForEach(viewModel.searchResults) { effect in
+                                            NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
+                                                EffectCardView(
+                                                    id: effect.id,
+                                                    images: [effect.afterImage?.url ?? "", effect.beforeImage?.url ?? ""],
+                                                    name: effect.name,
+                                                    programs: effect.programs?.map { $0.name } ?? [],
+                                                    rating: effect.averageRating ?? 0,
+                                                    isTopEffect: false,
+                                                    isFullWidth: true
+                                                )
+                                            }
                                         }
                                     }
+                                    .padding(.horizontal)
                                 }
-                                .padding(.horizontal)
                             }
                         }
                     }
                 }
-            }
-            .background(Color("LightGrey"))
-            .navigationBarHidden(true)
-            .navigationDestination(for: EffectRoute.self) { route in
-                switch route {
-                case .effectDetail(let id):
-                    EffectDetailView(viewModel: EffectDetailViewModel(effectId: id))
+                .background(Color("LightGrey"))
+                .navigationBarHidden(true)
+                .navigationDestination(for: EffectRoute.self) { route in
+                    switch route {
+                    case .effectDetail(let id):
+                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id))
+                    }
                 }
-            }
-            .navigationDestination(for: CategoryRoute.self) { route in
-                switch route {
-                case .category(let category):
-                    CategoryView(
-                        category: category,
-                        effects: viewModel.effectsByCategory[category.id] ?? []
-                    )
+                .navigationDestination(for: CategoryRoute.self) { route in
+                    switch route {
+                    case .category(let category):
+                        CategoryView(
+                            category: category,
+                            effects: viewModel.effectsByCategory[category.id] ?? []
+                        )
+                    }
                 }
             }
         }
@@ -124,23 +137,22 @@ struct CategorySection: View {
                 .padding(.horizontal)
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    // Показываем первые 3 эффекта
+                HStack(spacing: 6) {
+                    // Показываем все эффекты, если их меньше 3, иначе только первые 3
                     ForEach(effects.prefix(3)) { effect in
                         NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                             EffectCardView(
                                 id: effect.id,
-                                images: [effect.afterImage.url, effect.beforeImage.url],
+                                images: [effect.afterImage?.url ?? "", effect.beforeImage?.url ?? ""],
                                 name: effect.name,
-                                programs: effect.programList,
-                                rating: effect.averageRating,
+                                programs: effect.programs?.map { $0.name } ?? [],
+                                rating: effect.averageRating ?? 0,
                                 isTopEffect: false
                             )
                         }
                     }
-                    
-                    // Кнопка "Все"
-                    if effects.count >= 3 {
+                    // Кнопка "Все" появляется всегда, если есть хотя бы 1 эффект
+                    if effects.count > 0 {
                         NavigationLink(value: CategoryRoute.category(category: category)) {
                             VStack(spacing: 8) {
                                 Spacer()
