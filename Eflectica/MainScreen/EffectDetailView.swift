@@ -1,3 +1,10 @@
+//
+//  EffectDetailView.swift
+//  Eflectica
+//
+//  Created by Анна on 21.05.2025.
+//
+
 import SwiftUI
 
 struct EffectDetailView: View {

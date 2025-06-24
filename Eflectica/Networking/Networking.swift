@@ -1,8 +1,8 @@
 //
 //  Networking.swift
-//  HealthyWeather
+//  Eflectica
 //
-//  Created by Grigory Sosnovskiy on 06.08.2024.
+//  Created by Анна on 05.02.2025.
 //
 
 import Foundation

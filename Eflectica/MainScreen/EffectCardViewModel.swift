@@ -1,3 +1,10 @@
+//
+//  EffectCardViewModel.swift
+//  Eflectica
+//
+//  Created by Анна on 21.05.2025.
+//
+
 import Foundation
 import SwiftUI
 

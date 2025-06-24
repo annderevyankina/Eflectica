@@ -1,3 +1,10 @@
+//
+//  CategoryView.swift
+//  Eflectica
+//
+//  Created by Анна on 20.05.2025.
+//
+
 import SwiftUI
 
 struct CategoryView: View {

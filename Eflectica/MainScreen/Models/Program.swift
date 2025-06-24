@@ -1,3 +1,10 @@
+//
+//  Program.swift
+//  Eflectica
+//
+//  Created by Анна on 20.05.2025.
+//
+
 import Foundation
 
 struct Program: Identifiable {

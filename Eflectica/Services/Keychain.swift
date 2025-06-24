@@ -1,8 +1,8 @@
 //
 //  Keychain.swift
-//  Auth05
+//  Eflectica
 //
-//  Created by Grigory Sosnovskiy on 05.02.2025.
+//  Created by Анна on 05.02.2025.
 //
 
 import Security
