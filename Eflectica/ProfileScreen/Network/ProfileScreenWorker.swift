@@ -7,6 +7,11 @@
 
 import Foundation
 
+struct PatchProfileResponse: Decodable {
+    let message: String
+    let user: User
+}
+
 /// Специальные ошибки для профиля с описанием
 enum ProfileError: LocalizedError {
     case invalidURL
@@ -133,8 +138,8 @@ final class ProfileScreenWorker {
                 return DispatchQueue.main.async { completion(.failure(apiErr)) }
             }
             do {
-                let user = try JSONDecoder().decode(User.self, from: data)
-                DispatchQueue.main.async { completion(.success(user)) }
+                let response = try JSONDecoder().decode(PatchProfileResponse.self, from: data)
+                DispatchQueue.main.async { completion(.success(response.user)) }
             } catch {
                 DispatchQueue.main.async { completion(.failure(ProfileError.decodingError(error))) }
             }

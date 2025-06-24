@@ -20,12 +20,16 @@ struct ProfileScreenView: View {
     @State private var editedContact = ""
     @State private var isSaving = false
     @State private var saveError: String? = nil
+    @State private var selectedImage: UIImage? = nil
+    @State private var showImagePicker = false
+    @State private var showDeleteAccountAlert = false
+    @State private var isDeletingAccount = false
 
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
                 Color(.systemGray6).ignoresSafeArea()
-                if !authViewModel.isAuthorized {image.png
+                if !authViewModel.isAuthorized {
                     VStack {
                         Spacer()
                         Text("Чтобы посмотреть профиль, нужно войти")
@@ -142,25 +146,74 @@ struct ProfileScreenView: View {
                                                 .padding(.top, 24)
                                                 .padding(.horizontal)
                                                 // Аватар
-                                                AsyncImage(url: URL(string: user.avatar?.url ?? "")) { phase in
-                                                    switch phase {
-                                                    case .empty:
-                                                        ProgressView()
-                                                            .frame(width: 140, height: 140)
-                                                    case .success(let image):
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 140, height: 140)
-                                                            .clipShape(Circle())
-                                                    case .failure:
-                                                        Image("profilePhoto")
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 140, height: 140)
-                                                            .clipShape(Circle())
-                                                    @unknown default:
-                                                        EmptyView()
+                                                Group {
+                                                    if isEditing {
+                                                        Button(action: { showImagePicker = true }) {
+                                                            if let selectedImage = selectedImage {
+                                                                Image(uiImage: selectedImage)
+                                                                    .resizable()
+                                                                    .scaledToFill()
+                                                                    .frame(width: 140, height: 140)
+                                                                    .clipShape(Circle())
+                                                            } else {
+                                                                AsyncImage(url: URL(string: user.avatar?.url ?? "")) { phase in
+                                                                    switch phase {
+                                                                    case .empty:
+                                                                        ProgressView()
+                                                                            .frame(width: 140, height: 140)
+                                                                    case .success(let image):
+                                                                        image
+                                                                            .resizable()
+                                                                            .scaledToFill()
+                                                                            .frame(width: 140, height: 140)
+                                                                            .clipShape(Circle())
+                                                                    case .failure:
+                                                                        Image("profilePhoto")
+                                                                            .resizable()
+                                                                            .scaledToFill()
+                                                                            .frame(width: 140, height: 140)
+                                                                            .clipShape(Circle())
+                                                                    @unknown default:
+                                                                        EmptyView()
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        .buttonStyle(PlainButtonStyle())
+                                                        .padding(.top, 36)
+                                                        .sheet(isPresented: $showImagePicker) {
+                                                            ImagePicker(selectedImage: $selectedImage)
+                                                        }
+                                                    } else {
+                                                        if let selectedImage = selectedImage {
+                                                            Image(uiImage: selectedImage)
+                                                                .resizable()
+                                                                .scaledToFill()
+                                                                .frame(width: 140, height: 140)
+                                                                .clipShape(Circle())
+                                                        } else {
+                                                            AsyncImage(url: URL(string: user.avatar?.url ?? "")) { phase in
+                                                                switch phase {
+                                                                case .empty:
+                                                                    ProgressView()
+                                                                        .frame(width: 140, height: 140)
+                                                                case .success(let image):
+                                                                    image
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(width: 140, height: 140)
+                                                                        .clipShape(Circle())
+                                                                case .failure:
+                                                                    Image("profilePhoto")
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(width: 140, height: 140)
+                                                                        .clipShape(Circle())
+                                                                @unknown default:
+                                                                    EmptyView()
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                                 .padding(.top, 36)
@@ -179,7 +232,11 @@ struct ProfileScreenView: View {
                                                     TextField("@username", text: $editedUsername)
                                                         .foregroundColor(.gray)
                                                         .font(.system(size: 18))
-                                                        .padding(.horizontal)
+                                                        .padding(.horizontal, 12)
+                                                        .padding(.vertical, 8)
+                                                        .background(Color.white)
+                                                        .cornerRadius(8)
+                                                        .padding(.horizontal, 24)
                                                 } else {
                                                     Text("@\(user.username ?? "")")
                                                         .foregroundColor(.gray)
@@ -194,8 +251,8 @@ struct ProfileScreenView: View {
                                                         TextEditor(text: $editedBio)
                                                             .font(.system(size: 17))
                                                             .frame(minHeight: 80, maxHeight: 120)
-                                                            .padding(.horizontal, 4)
-                                                            .background(Color(.systemGray6))
+                                                            .padding(8)
+                                                            .background(Color.white)
                                                             .cornerRadius(8)
                                                     } else {
                                                         Text(user.bio ?? "")
@@ -204,7 +261,7 @@ struct ProfileScreenView: View {
                                                             .padding(.horizontal, 2)
                                                     }
                                                 }
-                                                .padding(.horizontal)
+                                                .padding(.horizontal, 16)
                                                 // Контакты
                                                 VStack(alignment: .leading, spacing: 8) {
                                                     Text("Написать мне")
@@ -217,6 +274,10 @@ struct ProfileScreenView: View {
                                                             TextField("@telegram", text: $editedContact)
                                                                 .font(.system(size: 17))
                                                                 .foregroundColor(Color("PrimaryBlue"))
+                                                                .padding(.vertical, 8)
+                                                                .padding(.horizontal, 8)
+                                                                .background(Color.white)
+                                                                .cornerRadius(8)
                                                         } else {
                                                             Text(user.contact ?? "")
                                                                 .font(.system(size: 17))
@@ -224,7 +285,7 @@ struct ProfileScreenView: View {
                                                         }
                                                     }
                                                 }
-                                                .padding(.horizontal)
+                                                .padding(.horizontal, 16)
                                                 if isEditing {
                                                     if let error = saveError {
                                                         Text(error)
@@ -240,6 +301,7 @@ struct ProfileScreenView: View {
                                                             "username": editedUsername,
                                                             "bio": editedBio,
                                                             "contact": editedContact
+                                                            // Для отправки фото потребуется доработать backend и worker
                                                         ]
                                                         ProfileScreenWorker().patchProfile(token: token, body: body) { result in
                                                             DispatchQueue.main.async {
@@ -264,8 +326,7 @@ struct ProfileScreenView: View {
                                                                 .foregroundColor(.white)
                                                                 .frame(maxWidth: .infinity)
                                                                 .frame(height: 48)
-                                                                .background(Color("PrimaryBlue"))
-                                                                .cornerRadius(8)
+                                                                .background(RoundedRectangle(cornerRadius: 8).fill(Color("PrimaryBlue")))
                                                                 .padding(.horizontal, 40)
                                                         }
                                                     }
@@ -308,9 +369,68 @@ struct ProfileScreenView: View {
                                 .cornerRadius(8)
                                 .padding(.horizontal, 40)
                         }
+                        .padding(.bottom, 16)
+                        .frame(maxWidth: .infinity)
+                        
+                        // Кнопка удаления аккаунта
+                        Button(action: {
+                            showDeleteAccountAlert = true
+                        }) {
+                            if isDeletingAccount {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: Color("DangerColor")))
+                                    .frame(height: 44)
+                            } else {
+                                Text("Удалить аккаунт")
+                                    .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                    .foregroundColor(Color("DangerColor"))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 44)
+                            }
+                        }
+                        .disabled(isDeletingAccount)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color("DangerColor"), lineWidth: 2)
+                        )
+                        .cornerRadius(8)
+                        .padding(.horizontal, 40)
                         .padding(.bottom, 32)
                         .frame(maxWidth: .infinity)
+                        .alert("Ты точно хочешь удалить профиль?", isPresented: $showDeleteAccountAlert) {
+                            Button("Нет", role: .cancel) {
+                                // Алерт автоматически исчезнет
+                            }
+                            Button("Да", role: .destructive) {
+                                deleteAccount()
+                            }
+                        } message: {
+                            Text("Это действие нельзя отменить. Все твои данные будут удалены навсегда.")
+                        }
                     }
+                }
+            }
+        }
+    }
+    
+    private func deleteAccount() {
+        guard let token = authViewModel.token else { return }
+        
+        isDeletingAccount = true
+        
+        ProfileScreenWorker().deleteProfile(token: token) { result in
+            DispatchQueue.main.async {
+                isDeletingAccount = false
+                
+                switch result {
+                case .success:
+                    // Успешно удалили аккаунт, выходим из системы
+                    authViewModel.logout()
+                case .failure(let error):
+                    // Показываем ошибку пользователю
+                    print("Ошибка удаления аккаунта: \(error)")
+                    // Можно добавить дополнительное уведомление об ошибке
                 }
             }
         }
