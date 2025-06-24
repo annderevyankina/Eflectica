@@ -7,66 +7,162 @@
 
 import SwiftUI
 
+// Добавляю enum SortType для сортировки
+fileprivate enum SortType {
+    case newest
+    case popular
+}
+
+// Добавляю словари русских названий задач и программ
+fileprivate let taskNamesRu: [String: String] = [
+    "advertisingProcessing": "Рекламная обработка",
+    "atmosphereWeather": "Атмосфера и погода",
+    "colorCorrection": "Цветокоррекция",
+    "graphicContent": "Графический контент",
+    "improvePhotoQuality": "Улучшение качества фото",
+    // ...добавь остальные задачи...
+]
+fileprivate let programNamesRu: [String: String] = [
+    "blender": "Blender",
+    "fc": "Final Cut",
+    "nuke": "Nuke",
+    "spark": "Spark AR",
+    // ...добавь остальные программы...
+]
+
 struct CategoryView: View {
     let category: Category
     let effects: [Effect]
     
     @State private var showingFilterSheet = false
+    @State private var filteredEffects: [Effect]? = nil
+    @State private var selectedTasks: [String] = []
+    @State private var selectedPrograms: [String] = []
+    @State private var sortType: SortType = .newest
     
     private let primaryBlue = Color("PrimaryBlue")
     private let textColor = Color("TextColor")
     private let greyColor = Color("Grey")
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                Text(category.name)
-                    .font(.custom("BasisGrotesquePro-Medium", size: 32))
-                    .foregroundStyle(primaryBlue)
-                    .padding(.horizontal)
-                    .padding(.top, 16)
-                
-                // Sort and Filter buttons
-                HStack(spacing: 8) {
-                    Button(action: {
-                        // Sort action
-                    }) {
-                        Image("sortIcon")
-                            .renderingMode(.template)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(10)
-                            .foregroundStyle(textColor)
+        ZStack(alignment: .top) {
+            VStack(spacing: 0) {
+                // Sticky header
+                VStack(alignment: .leading, spacing: 8) {
+                    // Первая строка — только заголовок
+                    Text(category.name)
+                        .font(.custom("BasisGrotesquePro-Medium", size: 32))
+                        .foregroundStyle(primaryBlue)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .padding(.top, 16)
+                    // Вторая строка — иконки сортировки и фильтра + теги рядом с фильтром
+                    HStack(alignment: .center, spacing: 8) {
+                        Menu {
+                            Button("Сначала новые") {
+                                sortType = .newest
+                                sortEffects()
+                            }
+                            Button("Сначала популярные") {
+                                sortType = .popular
+                                sortEffects()
+                            }
+                        } label: {
+                            Image("sortIcon")
+                                .renderingMode(.template)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 24, height: 24)
+                                .foregroundStyle(textColor)
+                        }
+                        .buttonStyle(IconSquareButtonStyle())
+                        // Фильтр + теги справа от фильтра
+                        HStack(spacing: 4) {
+                            Button(action: { showingFilterSheet = true }) {
+                                Image("filterIcon")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 24, height: 24)
+                                    .foregroundStyle(textColor)
+                            }
+                            .buttonStyle(IconSquareButtonStyle())
+                            // Теги выбранных задач и программ
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 4) {
+                                    ForEach(selectedTasks, id: \ .self) { task in
+                                        HStack(spacing: 4) {
+                                            Text(taskNamesRu[task] ?? task)
+                                                .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                                                .foregroundColor(primaryBlue)
+                                            Button(action: {
+                                                if let idx = selectedTasks.firstIndex(of: task) { selectedTasks.remove(at: idx) }
+                                                sortEffects()
+                                            }) {
+                                                Image(systemName: "xmark")
+                                                    .resizable()
+                                                    .frame(width: 12, height: 12)
+                                                    .foregroundColor(primaryBlue)
+                                            }
+                                            .padding(.trailing, 2)
+                                        }
+                                        .padding(.horizontal, 8)
+                                        .frame(height: 24)
+                                        .background(Color.white)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(primaryBlue, lineWidth: 2)
+                                        )
+                                    }
+                                    ForEach(selectedPrograms, id: \ .self) { program in
+                                        HStack(spacing: 4) {
+                                            Text(programNamesRu[program] ?? program)
+                                                .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                                                .foregroundColor(primaryBlue)
+                                            Button(action: {
+                                                if let idx = selectedPrograms.firstIndex(of: program) { selectedPrograms.remove(at: idx) }
+                                                sortEffects()
+                                            }) {
+                                                Image(systemName: "xmark")
+                                                    .resizable()
+                                                    .frame(width: 12, height: 12)
+                                                    .foregroundColor(primaryBlue)
+                                            }
+                                            .padding(.trailing, 2)
+                                        }
+                                        .padding(.horizontal, 8)
+                                        .frame(height: 24)
+                                        .background(Color.white)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(primaryBlue, lineWidth: 2)
+                                        )
+                                    }
+                                }
+                            }
+                            .frame(height: 24)
+                        }
                     }
-                    .buttonStyle(IconSquareButtonStyle())
-                    
-                    Button(action: {
-                        showingFilterSheet = true
-                    }) {
-                        Image("filterIcon")
-                            .renderingMode(.template)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(10)
-                            .foregroundStyle(textColor)
-                    }
-                    .buttonStyle(IconSquareButtonStyle())
+                    .padding(.leading, 16)
+                    .padding(.bottom, 24)
                 }
-                .padding(.horizontal)
-                
-                // Effects list
-                LazyVStack(spacing: 16) {
-                    ForEach(effects) { effect in
-                        NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
-                            EffectCardView(
-                                id: effect.id,
-                                images: [effect.afterImage?.url ?? "", effect.beforeImage?.url ?? ""],
-                                name: effect.name,
-                                programs: effect.programs?.map { $0.name } ?? [],
-                                rating: effect.averageRating ?? 0,
-                                isTopEffect: false,
-                                isFullWidth: true
-                            )
+                // Divider если нужно
+                Divider()
+                // Список эффектов
+                ScrollView {
+                    LazyVStack(spacing: 16) {
+                        ForEach(filteredEffects ?? effects) { effect in
+                            NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
+                                EffectCardView(
+                                    id: effect.id,
+                                    images: [effect.afterImage?.url ?? "", effect.beforeImage?.url ?? ""],
+                                    name: effect.name,
+                                    programs: effect.programs?.map { $0.name } ?? [],
+                                    rating: effect.averageRating ?? 0,
+                                    isTopEffect: false,
+                                    isFullWidth: true
+                                )
+                            }
                         }
                     }
                 }
@@ -76,17 +172,52 @@ struct CategoryView: View {
         .background(Color("LightGrey"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingFilterSheet) {
-            FilterView()
+            FilterView(effects: effects) { tasks, programs in
+                selectedTasks = tasks
+                selectedPrograms = programs
+                filteredEffects = effects.filter { effect in
+                    let matchesTask = tasks.isEmpty || (effect.tasks?.contains(where: { tasks.contains($0) }) ?? false)
+                    let matchesProgram = programs.isEmpty || ((effect.programs ?? []).map { $0.name }.contains(where: { programs.contains($0) }))
+                    return matchesTask && matchesProgram
+                }
+                showingFilterSheet = false
+            }
+        }
+    }
+    
+    private func sortEffects() {
+        let sortByNewest: (Effect, Effect) -> Bool = { lhs, rhs in
+            let lhsDate = ISO8601DateFormatter().date(from: lhs.createdAt ?? "") ?? .distantPast
+            let rhsDate = ISO8601DateFormatter().date(from: rhs.createdAt ?? "") ?? .distantPast
+            return lhsDate > rhsDate
+        }
+        let sortByRating: (Effect, Effect) -> Bool = { lhs, rhs in
+            (lhs.averageRating ?? 0) > (rhs.averageRating ?? 0)
+        }
+        if filteredEffects != nil {
+            switch sortType {
+            case .newest:
+                filteredEffects = filteredEffects?.sorted(by: sortByNewest)
+            case .popular:
+                filteredEffects = filteredEffects?.sorted(by: sortByRating)
+            }
+        } else {
+            switch sortType {
+            case .newest:
+                filteredEffects = effects.sorted(by: sortByNewest)
+            case .popular:
+                filteredEffects = effects.sorted(by: sortByRating)
+            }
         }
     }
 }
 
+// Модификация IconSquareButtonStyle для кастомной высоты
 struct IconSquareButtonStyle: ButtonStyle {
     var borderColor: Color = Color("Grey")
     var backgroundColor: Color = Color("WhiteColor")
     var cornerRadius: CGFloat = 6
     var size: CGFloat = 42
-    
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(width: size, height: size)

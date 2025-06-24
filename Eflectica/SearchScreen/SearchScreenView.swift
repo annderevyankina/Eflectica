@@ -23,6 +23,16 @@ struct SearchScreenView: View {
                         .font(.custom("BasisGrotesquePro-Regular", size: 17))
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
+                    Button("Повторить") {
+                        viewModel.loadEffects()
+                    }
+                    .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                    .foregroundColor(.white)
+                    .frame(height: 48)
+                    .frame(maxWidth: 220)
+                    .background(Color("PrimaryBlue"))
+                    .cornerRadius(8)
+                    .padding(.top, 16)
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
