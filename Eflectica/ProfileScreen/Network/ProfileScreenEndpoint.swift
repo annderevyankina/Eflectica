@@ -11,6 +11,8 @@ enum ProfileScreenEndpoint: Endpoint {
     case getAllUsers
     case getUser(id: Int, token: String)
     case getCurrentUser(token: String)
+    case patchProfile(token: String)
+    case deleteProfile(token: String)
 
     var compositePath: String {
         switch self {
@@ -20,6 +22,10 @@ enum ProfileScreenEndpoint: Endpoint {
             return "/api/v1/users/\(id)"
         case .getCurrentUser:
             return "/api/v1/users/me"
+        case .patchProfile:
+            return "/api/v1/profiles"
+        case .deleteProfile:
+            return "/api/v1/profiles"
         }
     }
 
@@ -29,6 +35,10 @@ enum ProfileScreenEndpoint: Endpoint {
         case .getAllUsers:
             break
         case .getUser(_, let token), .getCurrentUser(let token):
+            h["Authorization"] = token
+        case .patchProfile(let token):
+            h["Authorization"] = token
+        case .deleteProfile(let token):
             h["Authorization"] = token
         }
         return h

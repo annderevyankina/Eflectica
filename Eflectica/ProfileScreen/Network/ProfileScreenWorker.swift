@@ -99,5 +99,76 @@ final class ProfileScreenWorker {
         }
         .resume()
     }
+
+    /// PATCH профиль пользователя
+    func patchProfile(token: String, body: [String: Any], completion: @escaping (Result<User, Error>) -> Void) {
+        let endpoint = ProfileScreenEndpoint.patchProfile(token: token)
+        let urlString = baseURL + endpoint.compositePath
+        print("→ PATCH Profile URL: \(urlString)")
+        guard let url = URL(string: urlString) else {
+            return completion(.failure(ProfileError.invalidURL))
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        endpoint.headers.forEach { header, value in
+            request.setValue(value, forHTTPHeaderField: header)
+        }
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            return completion(.failure(error))
+        }
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                return DispatchQueue.main.async { completion(.failure(error)) }
+            }
+            guard let http = response as? HTTPURLResponse, let data = data else {
+                return DispatchQueue.main.async { completion(.failure(ProfileError.noResponse)) }
+            }
+            let rawBody = String(data: data, encoding: .utf8) ?? "<non-UTF8 data>"
+            print("➡️ PATCH HTTP status code:", http.statusCode)
+            print("📥 PATCH Raw response:\n\(rawBody)")
+            guard (200...299).contains(http.statusCode) else {
+                let apiErr = ProfileError.apiError(statusCode: http.statusCode, body: rawBody)
+                return DispatchQueue.main.async { completion(.failure(apiErr)) }
+            }
+            do {
+                let user = try JSONDecoder().decode(User.self, from: data)
+                DispatchQueue.main.async { completion(.success(user)) }
+            } catch {
+                DispatchQueue.main.async { completion(.failure(ProfileError.decodingError(error))) }
+            }
+        }.resume()
+    }
+
+    /// DELETE профиль пользователя
+    func deleteProfile(token: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let endpoint = ProfileScreenEndpoint.deleteProfile(token: token)
+        let urlString = baseURL + endpoint.compositePath
+        print("→ DELETE Profile URL: \(urlString)")
+        guard let url = URL(string: urlString) else {
+            return completion(.failure(ProfileError.invalidURL))
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        endpoint.headers.forEach { header, value in
+            request.setValue(value, forHTTPHeaderField: header)
+        }
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                return DispatchQueue.main.async { completion(.failure(error)) }
+            }
+            guard let http = response as? HTTPURLResponse else {
+                return DispatchQueue.main.async { completion(.failure(ProfileError.noResponse)) }
+            }
+            print("➡️ DELETE HTTP status code:", http.statusCode)
+            guard (200...299).contains(http.statusCode) else {
+                let rawBody = data.flatMap { String(data: $0, encoding: .utf8) } ?? "<no data>"
+                let apiErr = ProfileError.apiError(statusCode: http.statusCode, body: rawBody)
+                return DispatchQueue.main.async { completion(.failure(apiErr)) }
+            }
+            DispatchQueue.main.async { completion(.success(())) }
+        }.resume()
+    }
 }
 
