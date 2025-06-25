@@ -15,16 +15,26 @@ struct CommentCardViewModel: Identifiable {
     let dateString: String
 
     init(comment: Comment) {
-        self.id = comment.id
-        self.username = comment.user.username ?? ""
-        self.avatarUrl = comment.user.avatar.url ?? ""
-        self.text = comment.body
+        self.id = comment.id ?? 0
+        self.username = comment.user?.username ?? ""
+        if let q70url = comment.user?.avatar?.q70?.url {
+            self.avatarUrl = q70url
+        } else if let url = comment.user?.avatar?.url {
+            self.avatarUrl = url
+        } else {
+            self.avatarUrl = ""
+        }
+        self.text = comment.body ?? ""
         // Форматируем дату для отображения
         let formatter = DateFormatter()
         formatter.dateStyle = .long
         formatter.timeStyle = .none
         formatter.locale = Locale(identifier: "ru_RU")
-        self.dateString = formatter.string(from: comment.createdAt)
+        if let date = comment.createdAt {
+            self.dateString = formatter.string(from: date)
+        } else {
+            self.dateString = ""
+        }
     }
 }
 

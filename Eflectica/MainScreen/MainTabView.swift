@@ -10,11 +10,13 @@ import SwiftUI
 struct MainTabView: View {
     @StateObject private var searchViewModel = SearchScreenViewModel()
     @StateObject private var collectionsViewModel = CollectionsScreenViewModel()
+    @StateObject private var profileViewModel = ProfileScreenViewModel()
     @State private var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
             MainScreenView()
+                .environmentObject(profileViewModel)
                 .tabItem {
                     Image(selectedTab == 0 ? "mainIconActive" : "mainIcon")
                 }

@@ -29,6 +29,7 @@ struct EffectListView: View {
 struct MainScreenView: View {
     @StateObject private var viewModel = MainScreenViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var profileViewModel: ProfileScreenViewModel
     @State private var route: EffectRoute?
     @State private var showTopAll = false
     @State private var showFeedAll = false
@@ -295,11 +296,17 @@ struct MainScreenView: View {
                 .navigationDestination(for: EffectRoute.self) { route in
                     switch route {
                     case .effectDetail(let id):
-                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel))
+                        EffectDetailView(
+                            viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel),
+                            user: profileViewModel.user
+                        )
                     }
                 }
                 .onAppear {
                     viewModel.loadEffects()
+                    if let token = authViewModel.token {
+                        profileViewModel.loadCurrentUser(token: token)
+                    }
                 }
             }
         }

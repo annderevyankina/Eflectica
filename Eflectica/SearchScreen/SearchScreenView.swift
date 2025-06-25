@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchScreenView: View {
     @StateObject var viewModel: SearchScreenViewModel
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @EnvironmentObject var profileViewModel: ProfileScreenViewModel
     
     private let primaryBlue = Color("PrimaryBlue")
     private let textColor = Color("TextColor")
@@ -111,7 +112,10 @@ struct SearchScreenView: View {
                 .navigationDestination(for: EffectRoute.self) { route in
                     switch route {
                     case .effectDetail(let id):
-                        EffectDetailView(viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel))
+                        EffectDetailView(
+                            viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel),
+                            user: profileViewModel.user
+                        )
                     }
                 }
                 .navigationDestination(for: CategoryRoute.self) { route in
@@ -199,10 +203,5 @@ enum CategoryRoute: Hashable {
     case category(category: Category)
 }
 
-// MARK: - Preview Provider
-struct SearchScreenView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchScreenView(viewModel: SearchScreenViewModel())
-    }
-}
+
 

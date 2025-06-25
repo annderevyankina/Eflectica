@@ -89,58 +89,64 @@ struct CategoryView: View {
                             .buttonStyle(IconSquareButtonStyle())
                             // Теги выбранных задач и программ
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 4) {
+                                HStack(spacing: 8) {
                                     ForEach(selectedTasks, id: \ .self) { task in
-                                        HStack(spacing: 4) {
+                                        HStack(spacing: 8) {
                                             Text(taskNamesRu[task] ?? task)
                                                 .font(.custom("BasisGrotesquePro-Regular", size: 15))
                                                 .foregroundColor(primaryBlue)
+                                                .frame(maxHeight: .infinity, alignment: .center)
+                                                .padding(.leading, 10)
                                             Button(action: {
                                                 if let idx = selectedTasks.firstIndex(of: task) { selectedTasks.remove(at: idx) }
                                                 sortEffects()
                                             }) {
                                                 Image(systemName: "xmark")
                                                     .resizable()
-                                                    .frame(width: 12, height: 12)
+                                                    .frame(width: 14, height: 14)
                                                     .foregroundColor(primaryBlue)
+                                                    .padding(.trailing, 10)
+                                                    .frame(maxHeight: .infinity, alignment: .center)
                                             }
-                                            .padding(.trailing, 2)
                                         }
-                                        .padding(.horizontal, 8)
-                                        .frame(height: 24)
+                                        .frame(height: 42)
                                         .background(Color.white)
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(primaryBlue, lineWidth: 2)
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(Color("PrimaryBlue"), lineWidth: 2)
                                         )
+                                        .cornerRadius(6)
                                     }
                                     ForEach(selectedPrograms, id: \ .self) { program in
-                                        HStack(spacing: 4) {
-                                            Text(programNamesRu[program] ?? program)
+                                        HStack(spacing: 8) {
+                                            Text(Program.findByServerId(program)?.name ?? program)
                                                 .font(.custom("BasisGrotesquePro-Regular", size: 15))
                                                 .foregroundColor(primaryBlue)
+                                                .frame(maxHeight: .infinity, alignment: .center)
+                                                .padding(.leading, 10)
                                             Button(action: {
                                                 if let idx = selectedPrograms.firstIndex(of: program) { selectedPrograms.remove(at: idx) }
                                                 sortEffects()
                                             }) {
                                                 Image(systemName: "xmark")
                                                     .resizable()
-                                                    .frame(width: 12, height: 12)
+                                                    .frame(width: 14, height: 14)
                                                     .foregroundColor(primaryBlue)
+                                                    .padding(.trailing, 10)
+                                                    .frame(maxHeight: .infinity, alignment: .center)
                                             }
-                                            .padding(.trailing, 2)
                                         }
-                                        .padding(.horizontal, 8)
-                                        .frame(height: 24)
+                                        .frame(height: 42)
                                         .background(Color.white)
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(primaryBlue, lineWidth: 2)
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(Color("PrimaryBlue"), lineWidth: 2)
                                         )
+                                        .cornerRadius(6)
                                     }
                                 }
                             }
-                            .frame(height: 24)
+                            .frame(height: 42)
                         }
                     }
                     .padding(.leading, 16)

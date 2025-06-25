@@ -31,13 +31,6 @@ struct FilterView: View {
         "improvePhotoQuality": "Улучшение качества фото",
         // ...добавь остальные задачи...
     ]
-    private let programNamesRu: [String: String] = [
-        "blender": "Blender",
-        "fc": "Final Cut",
-        "nuke": "Nuke",
-        "spark": "Spark AR",
-        // ...добавь остальные программы...
-    ]
 
     private var allTasks: [String] {
         Array(Set(effects.compactMap { $0.tasks }.flatMap { $0 })).sorted()
@@ -114,7 +107,7 @@ struct FilterView: View {
                         let programsToShow = showAllPrograms ? allPrograms : Array(allPrograms.prefix(5))
                         ForEach(programsToShow, id: \ .self) { program in
                             FilterRow(
-                                title: programNamesRu[program] ?? program,
+                                title: Program.findByServerId(program)?.name ?? program,
                                 isSelected: selectedPrograms.contains(program),
                                 iconName: programIcons[program],
                                 onTap: {

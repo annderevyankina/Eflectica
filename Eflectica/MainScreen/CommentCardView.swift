@@ -23,7 +23,8 @@ struct CommentCardView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("@\(viewModel.username)")
-                        .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                        .font(.custom("BasisGrotesquePro-Medium", size: 15))
+                        .foregroundColor(Color.gray)
                 }
                 Spacer()
                 Text(viewModel.dateString)
@@ -31,7 +32,7 @@ struct CommentCardView: View {
                     .foregroundColor(Color.gray)
             }
             Text(viewModel.text)
-                .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                .font(.custom("BasisGrotesquePro-Regular", size: 17))
             Button(action: { /* Ответить */ }) {
                 Text("Ответить")
                     .font(.custom("BasisGrotesquePro-Regular", size: 15))
@@ -40,7 +41,7 @@ struct CommentCardView: View {
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(16)
+        .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
     }
 }

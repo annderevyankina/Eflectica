@@ -16,6 +16,7 @@ class EffectCardViewModel: ObservableObject {
     @Published var averageRating: Double
     @Published var programs: [String]
     @Published var categoryList: [String]
+    @Published var tasks: [String]?
     let authorUsername: String
     let authorAvatarUrl: String
     let manual: String?
@@ -28,6 +29,7 @@ class EffectCardViewModel: ObservableObject {
         averageRating: Double = 0.0,
         programs: [String],
         categoryList: [String],
+        tasks: [String]?,
         authorUsername: String,
         authorAvatarUrl: String,
         manual: String?
@@ -39,6 +41,7 @@ class EffectCardViewModel: ObservableObject {
         self.averageRating = averageRating
         self.programs = programs
         self.categoryList = categoryList
+        self.tasks = tasks
         self.authorUsername = authorUsername
         self.authorAvatarUrl = authorAvatarUrl
         self.manual = manual
@@ -57,6 +60,7 @@ class EffectCardViewModel: ObservableObject {
             averageRating: effect.averageRating ?? 0,
             programs: effect.programs?.map { $0.name } ?? [],
             categoryList: effect.categories ?? [],
+            tasks: effect.tasks,
             authorUsername: effect.author?.username ?? "",
             authorAvatarUrl: effect.author?.avatar.url ?? "",
             manual: effect.manual

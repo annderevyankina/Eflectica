@@ -42,6 +42,7 @@ class EffectDetailViewModel: ObservableObject {
                         averageRating: effect.averageRating ?? 0,
                         programs: effect.programs?.map { $0.name } ?? [],
                         categoryList: effect.categories ?? [],
+                        tasks: effect.tasks,
                         authorUsername: effect.author?.username ?? "",
                         authorAvatarUrl: effect.author?.avatar.url ?? "",
                         manual: effect.manual
@@ -56,8 +57,8 @@ class EffectDetailViewModel: ObservableObject {
     }
     
     func fetchComments() {
-        print("[EffectDetailViewModel] fetchComments started for id: \(effectId), token: \(authViewModel.token ?? "nil")")
-        worker.fetchEffectComments(id: effectId, token: authViewModel.token) { [weak self] result in
+        print("[EffectDetailViewModel] fetchComments started for id: \(effectId)")
+        worker.fetchEffectComments(id: effectId) { [weak self] result in
             Task { @MainActor in
                 switch result {
                 case .success(let comments):

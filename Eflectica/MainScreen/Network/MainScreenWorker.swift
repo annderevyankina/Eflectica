@@ -81,8 +81,8 @@ final class MainScreenWorker {
         }
     }
 
-    func fetchEffectComments(id: Int, token: String?, completion: @escaping (Result<[Comment], Error>) -> Void) {
-        let request = Request(endpoint: MainScreenEndpoint.getEffectComments(id: id, token: token), method: .get)
+    func fetchEffectComments(id: Int, completion: @escaping (Result<[Comment], Error>) -> Void) {
+        let request = Request(endpoint: MainScreenEndpoint.getEffectComments(id: id), method: .get)
         print("➡️ Отправка запроса комментариев: \(request)")
         worker.executeRequest(with: request) { response in
             switch response {
@@ -103,7 +103,12 @@ final class MainScreenWorker {
                 }
                 print("⬅️ Получено сырых данных: \(String(data: data, encoding: .utf8) ?? "nil")")
                 do {
-                    let comments = try JSONDecoder().decode([Comment].self, from: data)
+                    let decoder = JSONDecoder()
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                    dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+                    decoder.dateDecodingStrategy = .formatted(dateFormatter)
+                    let comments = try decoder.decode([Comment].self, from: data)
                     print("✅ Успешно декодировано комментариев: \(comments.count)")
                     completion(.success(comments))
                 } catch {
