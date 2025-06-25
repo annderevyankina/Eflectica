@@ -14,6 +14,7 @@ struct CollectionsScreenView: View {
     @State private var showAllTop = false
     @State private var showAllMy = false
     @State private var showAllSubs = false
+    @State private var selectedCollection: Collection? = nil
 
     var body: some View {
         Group {
@@ -123,6 +124,9 @@ struct CollectionsScreenView: View {
                                 HStack(spacing: 20) {
                                     ForEach(viewModel.filteredTopCollections.prefix(3)) { collection in
                                         CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
+                                            .onTapGesture {
+                                                selectedCollection = collection
+                                            }
                                     }
                                     if viewModel.filteredTopCollections.count > 3 {
                                         Button(action: { showAllTop = true }) {
@@ -176,12 +180,17 @@ struct CollectionsScreenView: View {
                         .padding(.horizontal)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
-                                // Избранное только если поиск пустой
                                 if viewModel.searchText.isEmpty, let favorites = viewModel.favorites.first {
                                     CollectionCardView(collection: favorites, isFavorite: true, onPlusTap: nil)
+                                        .onTapGesture {
+                                            selectedCollection = favorites
+                                        }
                                 }
                                 ForEach(viewModel.filteredMyCollections.prefix(3)) { collection in
                                     CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
+                                        .onTapGesture {
+                                            selectedCollection = collection
+                                        }
                                 }
                                 if viewModel.filteredMyCollections.count > 3 {
                                     Button(action: { showAllMy = true }) {
@@ -216,6 +225,9 @@ struct CollectionsScreenView: View {
                                 HStack(spacing: 20) {
                                     ForEach(viewModel.filteredSubCollections.prefix(3)) { collection in
                                         CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
+                                            .onTapGesture {
+                                                selectedCollection = collection
+                                            }
                                     }
                                     if viewModel.filteredSubCollections.count > 3 {
                                         Button(action: { showAllSubs = true }) {
@@ -245,6 +257,24 @@ struct CollectionsScreenView: View {
                                 .padding(.horizontal)
                         }
                         NavigationLink(destination: CollectionsListView(title: "Подписки", collections: viewModel.filteredSubCollections), isActive: $showAllSubs) { EmptyView() }.hidden()
+                        // Скрытый NavigationLink для перехода к элементам коллекции
+                        NavigationLink(
+                            destination: Group {
+                                if let collection = selectedCollection {
+                                    ElementsOfCollectionView(
+                                        elements: (collection.effects?.map { .effect($0) } ?? []) +
+                                                  (collection.images?.map { .image($0) } ?? []) +
+                                                  (collection.links?.map { .link($0) } ?? []),
+                                        collectionName: collection.name
+                                    )
+                                }
+                            },
+                            isActive: Binding(
+                                get: { selectedCollection != nil },
+                                set: { isActive in if !isActive { selectedCollection = nil } }
+                            )
+                        ) { EmptyView() }
+                        .hidden()
                     }
                     .padding(.vertical, 8)
                 }

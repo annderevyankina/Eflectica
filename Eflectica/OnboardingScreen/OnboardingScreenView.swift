@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct OnboardingView: View {
+struct OnboardingScreenView: View {
     @StateObject private var viewModel = OnboardingViewModel()
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 

@@ -15,30 +15,38 @@ struct MainTabView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            MainScreenView()
-                .environmentObject(profileViewModel)
-                .tabItem {
-                    Image(selectedTab == 0 ? "mainIconActive" : "mainIcon")
-                }
-                .tag(0)
+            NavigationView {
+                MainScreenView()
+                    .environmentObject(profileViewModel)
+            }
+            .tabItem {
+                Image(selectedTab == 0 ? "mainIconActive" : "mainIcon")
+            }
+            .tag(0)
             
-            SearchScreenView(viewModel: searchViewModel)
-                .tabItem {
-                    Image(selectedTab == 1 ? "searchIconActive" : "searchIcon")
-                }
-                .tag(1)
+            NavigationView {
+                SearchScreenView(viewModel: searchViewModel)
+            }
+            .tabItem {
+                Image(selectedTab == 1 ? "searchIconActive" : "searchIcon")
+            }
+            .tag(1)
             
-            CollectionsScreenView(viewModel: collectionsViewModel)
-                .tabItem {
-                    Image(selectedTab == 2 ? "colIectionsIconActive" : "colIectionsIcon")
-                }
-                .tag(2)
+            NavigationView {
+                CollectionsScreenView(viewModel: collectionsViewModel)
+            }
+            .tabItem {
+                Image(selectedTab == 2 ? "colIectionsIconActive" : "colIectionsIcon")
+            }
+            .tag(2)
             
-            ProfileScreenView()
-                .tabItem {
-                    Image(selectedTab == 3 ? "profileIconActive" : "profileIcon")
-                }
-                .tag(3)
+            NavigationView {
+                ProfileScreenView()
+            }
+            .tabItem {
+                Image(selectedTab == 3 ? "profileIconActive" : "profileIcon")
+            }
+            .tag(3)
         }
         .background(Color("LightGrey"))
         .onAppear {

@@ -15,6 +15,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				"Preview Content/Preview Assets.xcassets",
 			);
 			target = 9528F1352DA5CE2C00A19DF5 /* Eflectica */;
 		};

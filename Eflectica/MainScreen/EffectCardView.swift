@@ -123,28 +123,23 @@ struct EffectCardView: View {
 
                 HStack(spacing: 8) {
                     if !programModels.isEmpty {
-                        if isTopEffect {
-                            // Display only program icons for top effects
+                        if programModels.count == 1 {
+                            // Одна программа: и иконка, и название
+                            Image(programModels[0].iconName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                            Text(programModels[0].name)
+                                .font(.system(size: isFullWidth ? 17 : 14, weight: .medium))
+                                .foregroundColor(.primary)
+                        } else {
+                            // Несколько программ: только иконки всех программ
                             HStack(spacing: 8) {
-                                ForEach(programModels, id: \.name) { program in
+                                ForEach(programModels, id: \ .name) { program in
                                     Image(program.iconName)
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 40, height: 40)
-                                }
-                            }
-                        } else {
-                            // Display icon and name for regular effects
-                            HStack(spacing: 8) {
-                                Image(programModels[0].iconName)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 40, height: 40)
-                                
-                                if programModels.count == 1 {
-                                    Text(programModels[0].name)
-                                        .font(.system(size: isFullWidth ? 17 : 14, weight: .medium))
-                                        .foregroundColor(.primary)
                                 }
                             }
                         }

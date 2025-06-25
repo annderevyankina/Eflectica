@@ -22,6 +22,7 @@ struct Effect: Decodable, Identifiable {
     let categories: [String]?
     let tasks: [String]?
     let programs: [EffectProgram]?
+    let programsWithVersions: [EffectProgram]?
     let averageRating: Double?
     let beforeImage: EffectImage?
     let afterImage: EffectImage?
@@ -32,6 +33,7 @@ struct Effect: Decodable, Identifiable {
         case averageRating = "average_rating"
         case beforeImage = "before_image"
         case afterImage = "after_image"
+        case programsWithVersions = "programs_with_versions"
     }
     
     var platformList: [String] {

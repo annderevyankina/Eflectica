@@ -51,7 +51,7 @@ struct ContentView: View {
     
     var body: some View {
         if !hasCompletedOnboarding {
-            OnboardingView()
+            OnboardingScreenView()
         } else {
             MainTabView()
         }
