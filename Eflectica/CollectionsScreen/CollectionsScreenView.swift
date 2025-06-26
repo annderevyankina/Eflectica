@@ -10,6 +10,7 @@ import SwiftUI
 struct CollectionsScreenView: View {
     @ObservedObject var viewModel: CollectionsScreenViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var profileViewModel: ProfileScreenViewModel
     @State private var showAuth = false
     @State private var showAllTop = false
     @State private var showAllMy = false
@@ -17,7 +18,7 @@ struct CollectionsScreenView: View {
     @State private var selectedCollection: Collection? = nil
 
     var body: some View {
-        Group {
+        VStack {
             if let error = viewModel.errorMessage {
                 VStack {
                     Spacer()
@@ -155,7 +156,7 @@ struct CollectionsScreenView: View {
                                 .foregroundColor(.gray)
                                 .padding(.horizontal)
                         }
-                        NavigationLink(destination: CollectionsListView(title: "Топовые коллекции", collections: viewModel.filteredTopCollections), isActive: $showAllTop) { EmptyView() }.hidden()
+                        NavigationLink(destination: CollectionsListView(title: "Топовые коллекции", collections: viewModel.filteredTopCollections, user: profileViewModel.user), isActive: $showAllTop) { EmptyView() }.hidden()
                         // Мои коллекции
                         Text("Мои коллекции")
                             .font(.custom("BasisGrotesquePro-Medium", size: 22))
@@ -213,7 +214,7 @@ struct CollectionsScreenView: View {
                             }
                             .padding(.horizontal)
                         }
-                        NavigationLink(destination: CollectionsListView(title: "Мои коллекции", collections: viewModel.filteredMyCollections), isActive: $showAllMy) { EmptyView() }.hidden()
+                        NavigationLink(destination: CollectionsListView(title: "Мои коллекции", collections: viewModel.filteredMyCollections, user: profileViewModel.user), isActive: $showAllMy) { EmptyView() }.hidden()
                         // Подписки (заголовок всегда)
                         Text("Подписки")
                             .font(.custom("BasisGrotesquePro-Medium", size: 22))
@@ -256,7 +257,7 @@ struct CollectionsScreenView: View {
                                 .foregroundColor(.gray)
                                 .padding(.horizontal)
                         }
-                        NavigationLink(destination: CollectionsListView(title: "Подписки", collections: viewModel.filteredSubCollections), isActive: $showAllSubs) { EmptyView() }.hidden()
+                        NavigationLink(destination: CollectionsListView(title: "Подписки", collections: viewModel.filteredSubCollections, user: profileViewModel.user), isActive: $showAllSubs) { EmptyView() }.hidden()
                         // Скрытый NavigationLink для перехода к элементам коллекции
                         NavigationLink(
                             destination: Group {
@@ -265,7 +266,8 @@ struct CollectionsScreenView: View {
                                         elements: (collection.effects?.map { .effect($0) } ?? []) +
                                                   (collection.images?.map { .image($0) } ?? []) +
                                                   (collection.links?.map { .link($0) } ?? []),
-                                        collectionName: collection.name
+                                        collectionName: collection.name,
+                                        user: profileViewModel.user
                                     )
                                 }
                             },

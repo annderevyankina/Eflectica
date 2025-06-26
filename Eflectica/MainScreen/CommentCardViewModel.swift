@@ -1,10 +1,3 @@
-//
-//  CommentCardViewModel.swift.swift
-//  Eflectica
-//
-//  Created by Анна on 24.06.2025.
-//
-
 import Foundation
 
 struct CommentCardViewModel: Identifiable {
@@ -13,8 +6,9 @@ struct CommentCardViewModel: Identifiable {
     let avatarUrl: String
     let text: String
     let dateString: String
+    let currentUsername: String?
 
-    init(comment: Comment) {
+    init(comment: Comment, currentUsername: String? = nil) {
         self.id = comment.id ?? 0
         self.username = comment.user?.username ?? ""
         if let q70url = comment.user?.avatar?.q70?.url {
@@ -35,6 +29,12 @@ struct CommentCardViewModel: Identifiable {
         } else {
             self.dateString = ""
         }
+        self.currentUsername = currentUsername
     }
-}
 
+    var isMine: Bool {
+        print("DEBUG isMine: username=\(username), currentUsername=\(currentUsername ?? "nil")")
+        guard let current = currentUsername else { return false }
+        return username == current
+    }
+} 

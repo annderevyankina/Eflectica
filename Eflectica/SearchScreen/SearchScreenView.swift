@@ -113,8 +113,9 @@ struct SearchScreenView: View {
                     switch route {
                     case .effectDetail(let id):
                         EffectDetailView(
-                            viewModel: EffectDetailViewModel(effectId: id, authViewModel: authViewModel),
-                            user: profileViewModel.user
+                            effectId: id,
+                            user: profileViewModel.user,
+                            token: authViewModel.token
                         )
                     }
                 }

@@ -29,7 +29,9 @@ struct ElementsOfCollectionView: View {
     var collectionName: String? = nil
     var onEdit: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
+    let user: User?
     
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showShareSheet = false
     private let defaultShareUrl = "https://t.me/efixmedia"
     @State private var selectedEffectId: Int? = nil
@@ -237,8 +239,9 @@ struct ElementsOfCollectionView: View {
                 destination: Group {
                     if let effectId = selectedEffectId {
                         EffectDetailView(
-                            viewModel: EffectDetailViewModel(effectId: effectId, authViewModel: AuthViewModel()),
-                            user: nil
+                            effectId: effectId,
+                            user: user,
+                            token: authViewModel.token
                         )
                     }
                 },

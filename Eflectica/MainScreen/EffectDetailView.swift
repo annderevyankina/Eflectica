@@ -13,6 +13,7 @@ import Eflectica
 struct EffectDetailView: View {
     @StateObject var viewModel: EffectDetailViewModel
     let user: User?
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var isShareSheetPresented = false
     @State private var isAddToCollectionPresented = false
     @State private var commentText: String = ""
@@ -24,6 +25,11 @@ struct EffectDetailView: View {
     private let textColor = Color("TextColor")
     private let tagGrey = Color("Grey")
     private let pinkColor = Color("PinkColor")
+    
+    init(effectId: Int, user: User?, token: String?) {
+        self.user = user
+        _viewModel = StateObject(wrappedValue: EffectDetailViewModel(effectId: effectId, currentUsername: user?.username, token: token))
+    }
     
     var body: some View {
         ZStack {
@@ -180,7 +186,7 @@ struct EffectDetailView: View {
                                 .foregroundColor(textColor)
                                 .padding(.bottom, 0)
                             if let firstCategory = effectCard.categoryList.first {
-                                NavigationLink(destination: CategoryView(category: Category(id: firstCategory, name: categoryDescriptions[firstCategory] ?? firstCategory), effects: [])) {
+                                NavigationLink(destination: CategoryView(category: Category(id: firstCategory, name: categoryDescriptions[firstCategory] ?? firstCategory), effects: viewModel.effectsForCategory(firstCategory))) {
                                     HStack(spacing: 6) {
                                         Text(categoryDescriptions[firstCategory] ?? firstCategory)
                                             .font(.custom("BasisGrotesquePro-Medium", size: 17))
@@ -236,8 +242,10 @@ struct EffectDetailView: View {
                             Text("Комментарии (" + String(viewModel.comments.count) + ")")
                                 .font(.custom("BasisGrotesquePro-Medium", size: 18))
                                 .foregroundColor(textColor)
-                            ForEach(showAllComments ? viewModel.comments : Array(viewModel.comments.prefix(3))) { comment in
-                                CommentCardView(viewModel: comment)
+                            VStack(spacing: 12) {
+                                ForEach((showAllComments ? viewModel.comments : Array(viewModel.comments.prefix(3)))) { comment in
+                                    CommentCardView(viewModel: comment, onDelete: comment.isMine ? { viewModel.confirmDeleteComment(comment: comment) } : nil)
+                                }
                             }
                             if viewModel.comments.count > 3 && !showAllComments {
                                 Button(action: { showAllComments = true }) {
@@ -268,13 +276,16 @@ struct EffectDetailView: View {
                                     .font(.custom("BasisGrotesquePro-Regular", size: 16))
                                 // Кнопка отправки
                                 Button(action: {
-                                    commentText = ""
+                                    viewModel.postComment(text: commentText) { success in
+                                        if success { commentText = "" }
+                                    }
                                 }) {
                                     Image(commentText.isEmpty ? "sendIcon" : "sendIconActive")
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .frame(width: 22, height: 22)
                                 }
+                                .disabled(commentText.isEmpty)
                             }
                             .frame(height: 48)
                             .padding(.horizontal, 12)
@@ -329,6 +340,15 @@ struct EffectDetailView: View {
             } else {
                 ActivityView(activityItems: ["Ссылка недоступна"])
             }
+        }
+        .alert(isPresented: $viewModel.showDeleteAlert) {
+            Alert(
+                title: Text("Ты точно хочешь удалить комментарий?"),
+                primaryButton: .destructive(Text("Да")) {
+                    viewModel.deleteComment()
+                },
+                secondaryButton: .cancel(Text("Нет"))
+            )
         }
     }
 }

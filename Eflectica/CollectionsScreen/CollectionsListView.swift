@@ -3,6 +3,7 @@ import SwiftUI
 struct CollectionsListView: View {
     let title: String
     let collections: [Collection]
+    let user: User?
     @State private var selectedCollection: Collection? = nil
     
     // Вынесенная переменная для элементов коллекции
@@ -52,7 +53,8 @@ struct CollectionsListView: View {
                 if let collection = selectedCollection {
                     ElementsOfCollectionView(
                         elements: collectionElements,
-                        collectionName: collection.name
+                        collectionName: collection.name,
+                        user: user
                     )
                 }
             },

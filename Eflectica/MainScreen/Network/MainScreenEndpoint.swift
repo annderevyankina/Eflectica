@@ -10,7 +10,10 @@ import Foundation
 enum MainScreenEndpoint: Endpoint {
     case getAllEffects
     case getEffectDetails(id: Int)
+    case deleteEffect(id: Int)
     case getEffectComments(id: Int)
+    case postEffectComment(effectId: Int, token: String)
+    case deleteEffectComment(effectId: Int, commentId: Int, token: String)
 
     var compositePath: String {
         switch self {
@@ -18,18 +21,24 @@ enum MainScreenEndpoint: Endpoint {
             return "/api/v1/effects"
         case .getEffectDetails(let id):
             return "/api/v1/effects/\(id)"
+        case .deleteEffect(let id):
+            return "/api/v1/effects/\(id)"
         case .getEffectComments(let id):
             return "/api/v1/effects/\(id)/comments"
-        case .getEffectComments:
-            break // только Content-Type
+        case .postEffectComment(let effectId, _):
+            return "/api/v1/effects/\(effectId)/comments"
+        case .deleteEffectComment(let effectId, let commentId, _):
+            return "/api/v1/effects/\(effectId)/comments/\(commentId)"
         }
     }
 
     var headers: [String: String] {
         var h = ["Content-Type": "application/json"]
         switch self {
-        case .getEffectComments:
-            break // только Content-Type
+        case .postEffectComment(_, let token):
+            h["Authorization"] = "Bearer \(token)"
+        case .deleteEffectComment(_, _, let token):
+            h["Authorization"] = "Bearer \(token)"
         default:
             break
         }

@@ -17,8 +17,8 @@ struct MainTabView: View {
         TabView(selection: $selectedTab) {
             NavigationView {
                 MainScreenView()
-                    .environmentObject(profileViewModel)
             }
+            .environmentObject(profileViewModel)
             .tabItem {
                 Image(selectedTab == 0 ? "mainIconActive" : "mainIcon")
             }
@@ -27,6 +27,7 @@ struct MainTabView: View {
             NavigationView {
                 SearchScreenView(viewModel: searchViewModel)
             }
+            .environmentObject(profileViewModel)
             .tabItem {
                 Image(selectedTab == 1 ? "searchIconActive" : "searchIcon")
             }
@@ -35,6 +36,7 @@ struct MainTabView: View {
             NavigationView {
                 CollectionsScreenView(viewModel: collectionsViewModel)
             }
+            .environmentObject(profileViewModel)
             .tabItem {
                 Image(selectedTab == 2 ? "colIectionsIconActive" : "colIectionsIcon")
             }
@@ -43,6 +45,7 @@ struct MainTabView: View {
             NavigationView {
                 ProfileScreenView()
             }
+            .environmentObject(profileViewModel)
             .tabItem {
                 Image(selectedTab == 3 ? "profileIconActive" : "profileIcon")
             }

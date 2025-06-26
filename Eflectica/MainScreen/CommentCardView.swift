@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CommentCardView: View {
     let viewModel: CommentCardViewModel
+    var onDelete: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -33,10 +34,18 @@ struct CommentCardView: View {
             }
             Text(viewModel.text)
                 .font(.custom("BasisGrotesquePro-Regular", size: 17))
-            Button(action: { /* Ответить */ }) {
-                Text("Ответить")
-                    .font(.custom("BasisGrotesquePro-Regular", size: 15))
-                    .foregroundColor(Color.gray)
+            if viewModel.isMine {
+                Button(action: { onDelete?() }) {
+                    Text("Удалить")
+                        .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                        .foregroundColor(.red)
+                }
+            } else {
+                Button(action: { /* Ответить */ }) {
+                    Text("Ответить")
+                        .font(.custom("BasisGrotesquePro-Regular", size: 15))
+                        .foregroundColor(Color.gray)
+                }
             }
         }
         .padding()
