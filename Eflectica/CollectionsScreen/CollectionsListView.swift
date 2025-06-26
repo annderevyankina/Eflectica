@@ -33,7 +33,7 @@ struct CollectionsListView: View {
                 ScrollView {
                     LazyVStack(spacing: 20) {
                         ForEach(collections) { collection in
-                            CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
+                            CollectionCardView(collection: collection, type: .my, onPlusTap: nil)
                                 .onTapGesture {
                                     selectedCollection = collection
                                 }

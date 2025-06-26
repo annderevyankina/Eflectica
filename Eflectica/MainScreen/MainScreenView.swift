@@ -30,6 +30,7 @@ struct MainScreenView: View {
     @StateObject private var viewModel = MainScreenViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var profileViewModel: ProfileScreenViewModel
+    @EnvironmentObject var collectionsViewModel: CollectionsScreenViewModel
     @State private var route: EffectRoute?
     @State private var showTopAll = false
     @State private var showFeedAll = false
@@ -301,6 +302,7 @@ struct MainScreenView: View {
                             user: profileViewModel.user,
                             token: authViewModel.token
                         )
+                        .environmentObject(collectionsViewModel)
                     }
                 }
                 .onAppear {

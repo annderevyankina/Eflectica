@@ -1,17 +1,29 @@
 import SwiftUI
 
+enum CollectionCardType {
+    case my, top, sub, favorite
+}
+
 struct CollectionCardView: View {
     let collection: Collection
-    let isFavorite: Bool
+    let type: CollectionCardType
     let onPlusTap: (() -> Void)?
     
-    // Собираем до 3 картинок для коллажа (imageUrl или file.url)
+    // Коллаж из до 3 картинок: сначала эффекты, потом images, потом дефолт
     var collageImages: [String] {
-        let urls = (collection.images?.compactMap { $0.imageUrl?.isEmpty == false ? $0.imageUrl : $0.file.url } ?? [])
-        if urls.isEmpty {
-            return ["collection_pict"] // обложка по умолчанию
+        var result: [String] = []
+        if let effects = collection.effects {
+            let effectImages = effects.compactMap { $0.img.q70?.url ?? $0.img.url }.filter { !$0.isEmpty }
+            result.append(contentsOf: effectImages)
         }
-        return Array(urls.prefix(3))
+        if let images = collection.images {
+            let imageUrls = images.compactMap { $0.imageUrl?.isEmpty == false ? $0.imageUrl : $0.file.url }.filter { !$0.isEmpty }
+            result.append(contentsOf: imageUrls)
+        }
+        if result.isEmpty {
+            result.append("collection_pict")
+        }
+        return Array(result.prefix(3))
     }
     var elementsCount: Int {
         (collection.effects?.count ?? 0) + (collection.links?.count ?? 0) + (collection.images?.count ?? 0)
@@ -20,10 +32,18 @@ struct CollectionCardView: View {
         collection.effects?.count ?? 0
     }
     var titleColor: Color {
-        isFavorite ? Color.pink : Color("PrimaryBlue")
+        switch type {
+        case .my, .favorite: return Color.pink
+        case .top: return Color("DarkGrey")
+        case .sub: return Color("PrimaryBlue")
+        }
     }
     var titleBackground: Color {
-        isFavorite ? Color("PinkColor") : Color("PrimaryBlue")
+        switch type {
+        case .my, .favorite: return Color("PinkColor")
+        case .top: return Color(red: 224/255, green: 224/255, blue: 224/255) // E0E0E0
+        case .sub: return Color("PrimaryBlue")
+        }
     }
     
     var body: some View {
@@ -35,7 +55,7 @@ struct CollectionCardView: View {
                         .cornerRadius(8, corners: [.topLeft, .topRight])
                     Text(collection.name)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(type == .top ? .black : .white)
                         .padding(.horizontal, 12)
                 }
                 CollageView(imageUrls: collageImages)
@@ -53,7 +73,6 @@ struct CollectionCardView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 16)
             }
-            // Кнопка + в правом нижнем углу
             if let onPlusTap = onPlusTap {
                 Button(action: onPlusTap) {
                     Image(systemName: "plus")
@@ -74,7 +93,7 @@ struct CollectionCardView: View {
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.07), radius: 8, x: 0, y: 2)
         .frame(width: 220, height: 240)
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 }
 

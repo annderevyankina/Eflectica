@@ -23,6 +23,7 @@ enum CollectionElement: Identifiable {
 }
 
 struct ElementsOfCollectionView: View {
+    @EnvironmentObject var collectionsViewModel: CollectionsScreenViewModel
     let elements: [CollectionElement]
     var isMy: Bool = false
     var onAddElement: (() -> Void)? = nil
@@ -243,6 +244,7 @@ struct ElementsOfCollectionView: View {
                             user: user,
                             token: authViewModel.token
                         )
+                        .environmentObject(collectionsViewModel)
                     }
                 },
                 isActive: Binding(

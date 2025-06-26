@@ -19,6 +19,7 @@ struct MainTabView: View {
                 MainScreenView()
             }
             .environmentObject(profileViewModel)
+            .environmentObject(collectionsViewModel)
             .tabItem {
                 Image(selectedTab == 0 ? "mainIconActive" : "mainIcon")
             }

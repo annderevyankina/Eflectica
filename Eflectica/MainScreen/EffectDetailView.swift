@@ -14,10 +14,15 @@ struct EffectDetailView: View {
     @StateObject var viewModel: EffectDetailViewModel
     let user: User?
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var collectionsViewModel: CollectionsScreenViewModel
     @State private var isShareSheetPresented = false
     @State private var isAddToCollectionPresented = false
     @State private var commentText: String = ""
     @State private var showAllComments = false
+    @State private var showAddToCollectionSheet = false
+    @State private var selectedCollectionId: Int? = nil
+    @State private var isSavingToCollection = false
+    @State private var showSuccessAlert = false
     
     private let primaryBlue = Color("PrimaryBlue")
     private let darkGrey = Color("DarkGrey")
@@ -89,7 +94,7 @@ struct EffectDetailView: View {
                                     .background(primaryBlue)
                                     .cornerRadius(6)
                             }
-                            Button(action: { /* TODO: заглушка */ }) {
+                            Button(action: { showAddToCollectionSheet = true }) {
                                 ZStack {
                                     Color.white
                                     Image("plusIcon")
@@ -328,11 +333,57 @@ struct EffectDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.fetchEffectDetails()
+            if let token = authViewModel.token {
+                print("DEBUG: Загружаю коллекции с токеном: \(token.prefix(8))...")
+                collectionsViewModel.loadMyCollections(token: token)
+            } else {
+                print("DEBUG: Нет токена для загрузки коллекций")
+            }
+            print("DEBUG: favorites =", collectionsViewModel.favorites)
+            print("DEBUG: myCollections =", collectionsViewModel.myCollections)
         }
-        .sheet(isPresented: $isAddToCollectionPresented) {
-            Text("Добавить в коллекцию (заглушка)")
-                .font(.title)
-                .padding()
+        .sheet(isPresented: $showAddToCollectionSheet) {
+            AddToCollectionSheet(
+                collections: collectionsViewModel.favorites + collectionsViewModel.myCollections,
+                selectedCollectionId: $selectedCollectionId,
+                isSaving: $isSavingToCollection,
+                onSave: { collectionId in
+                    guard let token = authViewModel.token else {
+                        print("❌ Нет токена для добавления эффекта в коллекцию")
+                        return
+                    }
+                    guard let collectionId = collectionId else {
+                        print("❌ Не выбрана коллекция для добавления эффекта")
+                        return
+                    }
+                    isSavingToCollection = true
+                    let effectId = viewModel.effectId
+                    print("➡️ addEffect: token=\(token.prefix(8))..., collectionId=\(collectionId), effectId=\(effectId)")
+                    CollectionsScreenWorker().addEffect(token: token, collectionId: collectionId, effectId: effectId) { result in
+                        DispatchQueue.main.async {
+                            isSavingToCollection = false
+                            switch result {
+                            case .success:
+                                print("✅ Эффект успешно добавлен в коллекцию")
+                                showAddToCollectionSheet = false
+                                showSuccessAlert = true
+                                collectionsViewModel.loadMyCollections(token: token)
+                            case .failure(let error):
+                                print("❌ Ошибка при добавлении эффекта в коллекцию: \(error)")
+                            }
+                        }
+                    }
+                },
+                onClose: { showAddToCollectionSheet = false }
+            )
+            .presentationDetents([.height(420)])
+            .onAppear {
+                let allCollections = collectionsViewModel.favorites + collectionsViewModel.myCollections
+                print("DEBUG: collections для модалки =", allCollections.map { "\($0.id): \($0.name)" })
+                if allCollections.isEmpty {
+                    print("DEBUG: Нет коллекций для отображения в модалке")
+                }
+            }
         }
         .sheet(isPresented: $isShareSheetPresented) {
             if let url = URL(string: "https://t.me/efixmedia") {
@@ -349,6 +400,9 @@ struct EffectDetailView: View {
                 },
                 secondaryButton: .cancel(Text("Нет"))
             )
+        }
+        .alert(isPresented: $showSuccessAlert) {
+            Alert(title: Text("Эффект добавлен в коллекцию!"), dismissButton: .default(Text("Ок")))
         }
     }
 }
@@ -486,6 +540,97 @@ struct FlexibleTagsView: View {
         let attributes = [NSAttributedString.Key.font: font]
         let size = (text as NSString).size(withAttributes: attributes)
         return size.width + 24 // 12 + 12 horizontal padding
+    }
+}
+
+struct AddToCollectionSheet: View {
+    let collections: [Collection]
+    @Binding var selectedCollectionId: Int?
+    @Binding var isSaving: Bool
+    var onSave: (Int?) -> Void
+    var onClose: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Выбери коллекцию")
+                    .font(.custom("BasisGrotesquePro-Medium", size: 24))
+                    .foregroundColor(.black)
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(.black)
+                        .padding(8)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 8)
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(collections) { collection in
+                        Button(action: {
+                            if selectedCollectionId == collection.id {
+                                selectedCollectionId = nil
+                            } else {
+                                selectedCollectionId = collection.id
+                            }
+                        }) {
+                            HStack {
+                                Text(collection.name)
+                                    .font(.custom("BasisGrotesquePro-Medium", size: 18))
+                                    .foregroundColor(collection.name == "Избранное" ? Color("PinkColor") : .black)
+                                Spacer()
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                                        .frame(width: 24, height: 24)
+                                    if selectedCollectionId == collection.id {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(Color("PrimaryBlue"))
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 20)
+                        }
+                        .background(Color.white)
+                        if collection.id != collections.last?.id {
+                            Divider().padding(.leading, 20)
+                        }
+                    }
+                }
+            }
+            .frame(maxHeight: 260)
+            .onAppear {
+                for collection in collections {
+                    print("DEBUG: Показываю коллекцию в модалке: \(collection.id) \(collection.name), эффектов: \(collection.effects?.count ?? 0), картинок: \(collection.images?.count ?? 0), ссылок: \(collection.links?.count ?? 0)")
+                }
+            }
+            Spacer(minLength: 0)
+            Button(action: { onSave(selectedCollectionId) }) {
+                if isSaving {
+                    ProgressView()
+                        .frame(height: 52)
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text("Сохранить")
+                        .font(.custom("BasisGrotesquePro-Medium", size: 18))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(Color("PrimaryBlue"))
+                        .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 16)
+                }
+            }
+            .disabled(selectedCollectionId == nil || isSaving)
+        }
+        .background(Color.white)
+        .cornerRadius(20)
     }
 }
 

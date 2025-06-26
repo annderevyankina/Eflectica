@@ -11,6 +11,7 @@ struct SearchScreenView: View {
     @StateObject var viewModel: SearchScreenViewModel
     @EnvironmentObject private var authViewModel: AuthViewModel
     @EnvironmentObject var profileViewModel: ProfileScreenViewModel
+    @EnvironmentObject var collectionsViewModel: CollectionsScreenViewModel
     
     private let primaryBlue = Color("PrimaryBlue")
     private let textColor = Color("TextColor")
@@ -117,6 +118,7 @@ struct SearchScreenView: View {
                             user: profileViewModel.user,
                             token: authViewModel.token
                         )
+                        .environmentObject(collectionsViewModel)
                     }
                 }
                 .navigationDestination(for: CategoryRoute.self) { route in

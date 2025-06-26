@@ -89,7 +89,7 @@ struct CollectionsScreenView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 36) {
+                    VStack(alignment: .leading, spacing: 18) {
                         // Главный заголовок
                         Text("Коллекции")
                             .font(.custom("BasisGrotesquePro-Medium", size: 32))
@@ -119,12 +119,12 @@ struct CollectionsScreenView: View {
                             .font(.custom("BasisGrotesquePro-Medium", size: 22))
                             .foregroundColor(.black)
                             .padding(.horizontal)
-                            .padding(.top, 8)
+                            .padding(.top, 2)
                         if !viewModel.filteredTopCollections.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 20) {
+                                HStack(spacing: 8) {
                                     ForEach(viewModel.filteredTopCollections.prefix(3)) { collection in
-                                        CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
+                                        CollectionCardView(collection: collection, type: .top, onPlusTap: nil)
                                             .onTapGesture {
                                                 selectedCollection = collection
                                             }
@@ -150,6 +150,7 @@ struct CollectionsScreenView: View {
                                 }
                                 .padding(.horizontal)
                             }
+                            .padding(.bottom, 8)
                         } else {
                             Text("Пока нет топовых коллекций")
                                 .font(.custom("BasisGrotesquePro-Regular", size: 16))
@@ -162,7 +163,7 @@ struct CollectionsScreenView: View {
                             .font(.custom("BasisGrotesquePro-Medium", size: 22))
                             .foregroundColor(.black)
                             .padding(.horizontal)
-                            .padding(.top, 8)
+                            .padding(.top, 2)
                         Button(action: {
                             // TODO: Действие по созданию коллекции
                         }) {
@@ -179,40 +180,19 @@ struct CollectionsScreenView: View {
                             .cornerRadius(8)
                         }
                         .padding(.horizontal)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                if viewModel.searchText.isEmpty, let favorites = viewModel.favorites.first {
-                                    CollectionCardView(collection: favorites, isFavorite: true, onPlusTap: nil)
-                                        .onTapGesture {
-                                            selectedCollection = favorites
-                                        }
-                                }
-                                ForEach(viewModel.filteredMyCollections.prefix(3)) { collection in
-                                    CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
-                                        .onTapGesture {
-                                            selectedCollection = collection
-                                        }
-                                }
-                                if viewModel.filteredMyCollections.count > 3 {
-                                    Button(action: { showAllMy = true }) {
-                                        VStack(spacing: 8) {
-                                            Spacer()
-                                            Image("moreIcon")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 24, height: 24)
-                                                .foregroundColor(Color("PrimaryBlue"))
-                                            Text("Все")
-                                                .font(.custom("BasisGrotesquePro-Medium", size: 17))
-                                                .foregroundColor(Color("PrimaryBlue"))
-                                            Spacer()
-                                        }
-                                        .frame(width: 100, height: 240)
-                                        .cornerRadius(12)
+                        if !viewModel.filteredMyCollections.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(viewModel.filteredMyCollections) { collection in
+                                        CollectionCardView(collection: collection, type: .my, onPlusTap: nil)
+                                            .onTapGesture {
+                                                selectedCollection = collection
+                                            }
                                     }
                                 }
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
+                            .padding(.bottom, 8)
                         }
                         NavigationLink(destination: CollectionsListView(title: "Мои коллекции", collections: viewModel.filteredMyCollections, user: profileViewModel.user), isActive: $showAllMy) { EmptyView() }.hidden()
                         // Подписки (заголовок всегда)
@@ -220,37 +200,20 @@ struct CollectionsScreenView: View {
                             .font(.custom("BasisGrotesquePro-Medium", size: 22))
                             .foregroundColor(.black)
                             .padding(.horizontal)
-                            .padding(.top, 8)
+                            .padding(.top, 2)
                         if !viewModel.filteredSubCollections.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 20) {
-                                    ForEach(viewModel.filteredSubCollections.prefix(3)) { collection in
-                                        CollectionCardView(collection: collection, isFavorite: false, onPlusTap: nil)
+                                HStack(spacing: 8) {
+                                    ForEach(viewModel.filteredSubCollections) { collection in
+                                        CollectionCardView(collection: collection, type: .sub, onPlusTap: nil)
                                             .onTapGesture {
                                                 selectedCollection = collection
                                             }
                                     }
-                                    if viewModel.filteredSubCollections.count > 3 {
-                                        Button(action: { showAllSubs = true }) {
-                                            VStack(spacing: 8) {
-                                                Spacer()
-                                                Image("moreIcon")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 24, height: 24)
-                                                    .foregroundColor(Color("PrimaryBlue"))
-                                                Text("Все")
-                                                    .font(.custom("BasisGrotesquePro-Medium", size: 17))
-                                                    .foregroundColor(Color("PrimaryBlue"))
-                                                Spacer()
-                                            }
-                                            .frame(width: 100, height: 240)
-                                            .cornerRadius(12)
-                                        }
-                                    }
                                 }
                                 .padding(.horizontal)
                             }
+                            .padding(.bottom, 8)
                         } else {
                             Text("Пока нет подписок")
                                 .font(.custom("BasisGrotesquePro-Regular", size: 16))
@@ -269,6 +232,7 @@ struct CollectionsScreenView: View {
                                         collectionName: collection.name,
                                         user: profileViewModel.user
                                     )
+                                    .environmentObject(viewModel)
                                 }
                             },
                             isActive: Binding(
