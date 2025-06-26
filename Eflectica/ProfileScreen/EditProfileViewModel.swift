@@ -25,8 +25,6 @@ final class EditProfileViewModel: ObservableObject {
     }
     
     func saveProfile() {
-        // Логика сохранения профиля
         isLoading = true
-        // Вызов API для обновления профиля
     }
 }

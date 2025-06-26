@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ProfileScreenView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @StateObject private var viewModel = ProfileScreenViewModel()
     @State private var showAuth = false
     @State private var showEditProfileAlert = false
@@ -52,16 +51,21 @@ struct ProfileScreenView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if viewModel.user == nil && !viewModel.isLoading {
+                } else if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.user == nil {
                     VStack {
                         Spacer()
-                        Text("Не можем загрузить данные. Проверьте подключение к интернету")
+                        Text(viewModel.errorMessage ?? "Не можем загрузить данные. Проверьте подключение к интернету")
                             .font(.custom("BasisGrotesquePro-Regular", size: 17))
                             .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
                         Button("Повторить") {
                             if let token = authViewModel.token {
                                 viewModel.loadCurrentUser(token: token)
+                            } else {
+                                viewModel.errorMessage = "Нет JWT-токена"
                             }
                         }
                         .font(.custom("BasisGrotesquePro-Medium", size: 17))
@@ -115,7 +119,7 @@ struct ProfileScreenView: View {
                                     } else {
                                         ScrollView {
                                             VStack(spacing: 20) {
-                                                // Заголовок + edit
+                                                // Заголовок 
                                                 HStack(alignment: .center, spacing: 8) {
                                                     Text("Профиль")
                                                         .font(.custom("BasisGrotesquePro-Medium", size: 32))
@@ -338,23 +342,18 @@ struct ProfileScreenView: View {
                                             .padding(.bottom, 40)
                                         }
                                     }
-                                } else if viewModel.isLoading {
-                                    ProgressView()
-                                        .padding(.top, 100)
                                 }
                             }
                         }
                         .navigationBarTitleDisplayMode(.inline)
                         .onAppear {
-                            if let token = authViewModel.token {
+                            if authViewModel.isAuthorized, let token = authViewModel.token, viewModel.user == nil, !viewModel.isLoading {
                                 viewModel.loadCurrentUser(token: token)
-                            } else {
-                                viewModel.errorMessage = "Нет JWT-токена"
                             }
                         }
-                        // Кнопка сброса онбординга внизу
+                        // Кнопка сброса онбординга
                         Button(action: {
-                            hasCompletedOnboarding = false
+                            authViewModel.hasCompletedOnboarding = false
                         }) {
                             Text("Сбросить онбординг")
                                 .font(.custom("BasisGrotesquePro-Regular", size: 17))

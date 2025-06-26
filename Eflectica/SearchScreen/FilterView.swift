@@ -29,7 +29,6 @@ struct FilterView: View {
         "colorCorrection": "Цветокоррекция",
         "graphicContent": "Графический контент",
         "improvePhotoQuality": "Улучшение качества фото",
-        // ...добавь остальные задачи...
     ]
 
     private var allTasks: [String] {
@@ -39,7 +38,6 @@ struct FilterView: View {
         Array(Set(effects.flatMap { $0.programs ?? [] }.map { $0.name })).sorted()
     }
     private var programIcons: [String: String] {
-        // Пример: ["Lightroom": "lightroom_icon", ...] — подстрой под свои ассеты
         ["Lightroom": "lightroom_icon", "Photoshop": "photoshop_icon", "Capture One": "captureone_icon", "Affinity Photo": "affinityphoto_icon"]
     }
 
@@ -47,7 +45,6 @@ struct FilterView: View {
         ZStack(alignment: .bottom) {
             Color.white.ignoresSafeArea()
             VStack(spacing: 0) {
-                // Header
                 HStack {
                     Text("Фильтрация")
                         .font(.custom("BasisGrotesquePro-Bold", size: 28))
@@ -65,7 +62,6 @@ struct FilterView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
-                        // Task section
                         Text("Задача")
                             .font(.custom("BasisGrotesquePro-Medium", size: 20))
                             .foregroundColor(textColor)
@@ -98,7 +94,6 @@ struct FilterView: View {
                             }
                         }
 
-                        // Program section
                         Text("Программа")
                             .font(.custom("BasisGrotesquePro-Medium", size: 20))
                             .foregroundColor(textColor)
@@ -137,7 +132,6 @@ struct FilterView: View {
                         Spacer(minLength: 80)
                     }
                 }
-                // Кнопка Применить
                 Button(action: {
                     onApply?(Array(selectedTasks), Array(selectedPrograms))
                     dismiss()

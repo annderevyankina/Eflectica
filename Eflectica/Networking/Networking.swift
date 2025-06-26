@@ -7,8 +7,6 @@
 
 import Foundation
 
-// For dependency injections and custom networkers
-// Example: Service that allows switching to testing environments
 protocol NetworkingLogic {
     typealias Response = ((_ response: Result<Networking.ServerResponse, Error>) -> Void)
 

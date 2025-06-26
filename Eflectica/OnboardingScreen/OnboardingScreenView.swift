@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OnboardingScreenView: View {
     @StateObject private var viewModel = OnboardingViewModel()
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     private let primaryColor = Color("PrimaryBlue")
     private let greyColor = Color("DarkGrey")
@@ -74,11 +74,9 @@ struct OnboardingScreenView: View {
         .gesture(
             DragGesture()
                 .onEnded { value in
-                    // Свайп влево - следующий слайд
                     if value.translation.width < -50, viewModel.currentIndex < viewModel.items.count - 1 {
                         withAnimation { viewModel.currentIndex += 1 }
                     }
-                    // Свайп вправо - предыдущий слайд
                     if value.translation.width > 50, viewModel.currentIndex > 0 {
                         withAnimation { viewModel.currentIndex -= 1 }
                     }
@@ -88,7 +86,7 @@ struct OnboardingScreenView: View {
     }
 
     private func completeOnboarding() {
-        hasCompletedOnboarding = true
+        authViewModel.hasCompletedOnboarding = true
     }
 }
 

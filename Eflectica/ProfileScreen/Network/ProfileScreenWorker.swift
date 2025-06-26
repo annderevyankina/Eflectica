@@ -12,7 +12,6 @@ struct PatchProfileResponse: Decodable {
     let user: User
 }
 
-/// Специальные ошибки для профиля с описанием
 enum ProfileError: LocalizedError {
     case invalidURL
     case noResponse
@@ -36,7 +35,7 @@ enum ProfileError: LocalizedError {
 final class ProfileScreenWorker {
     private let baseURL = "http://localhost:3000"
 
-    /// Получить текущего пользователя по токену с подробным логированием
+    /// GET  пользователя 
     func fetchCurrentUser(token: String,
                           completion: @escaping (Result<User, Error>) -> Void) {
         let endpoint = ProfileScreenEndpoint.getCurrentUser(token: token)

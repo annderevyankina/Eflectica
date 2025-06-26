@@ -12,7 +12,6 @@ struct EflecticaApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     init() {
-        // Включаем поддержку хоумбара на уровне приложения
         if #available(iOS 15.0, *) {
             let appearance = UITabBarAppearance()
             appearance.configureWithDefaultBackground()
@@ -47,10 +46,10 @@ struct RootView: View {
 }
 
 struct ContentView: View {
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     var body: some View {
-        if !hasCompletedOnboarding {
+        if !authViewModel.hasCompletedOnboarding {
             OnboardingScreenView()
         } else {
             MainTabView()

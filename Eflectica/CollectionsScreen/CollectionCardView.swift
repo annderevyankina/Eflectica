@@ -9,7 +9,6 @@ struct CollectionCardView: View {
     let type: CollectionCardType
     let onPlusTap: (() -> Void)?
     
-    // Коллаж из до 3 картинок: сначала эффекты, потом images, потом дефолт
     var collageImages: [String] {
         var result: [String] = []
         if let effects = collection.effects {

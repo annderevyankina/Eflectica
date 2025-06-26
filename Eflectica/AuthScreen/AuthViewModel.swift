@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 final class AuthViewModel: ObservableObject {
     private enum Const {
@@ -17,7 +18,8 @@ final class AuthViewModel: ObservableObject {
 
     // MARK: – Published для UI
     @Published var isAuthorized: Bool = false
-    @Published var token: String?                  // ← хранит JWT
+    @Published var token: String?
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
 
     // Ошибки для отображения под инпутами
     @Published var emailError: String?
@@ -128,7 +130,7 @@ final class AuthViewModel: ObservableObject {
                     // Сохранение токена
                     self?.keychain.setString(jwt, forKey: Const.tokenKey)
                     DispatchQueue.main.async {
-                        self?.token = jwt          // ← обновляем свойство
+                        self?.token = jwt          
                         self?.isAuthorized = true
                     }
                     print("signUp successful, token:", jwt)
@@ -185,7 +187,7 @@ final class AuthViewModel: ObservableObject {
                     // Сохранение токена
                     self?.keychain.setString(jwt, forKey: Const.tokenKey)
                     DispatchQueue.main.async {
-                        self?.token = jwt          // ← обновляем свойство
+                        self?.token = jwt
                         self?.isAuthorized = true
                     }
                     print("signIn successful, token:", jwt)
@@ -227,7 +229,7 @@ final class AuthViewModel: ObservableObject {
         keychain.removeData(forKey: Const.tokenKey)
         DispatchQueue.main.async {
             self.isAuthorized = false
-            self.token = nil               // ← очищаем токен
+            self.token = nil
         }
     }
 

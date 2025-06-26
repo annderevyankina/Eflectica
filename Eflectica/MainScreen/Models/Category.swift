@@ -8,8 +8,8 @@
 import Foundation
 
 struct Category: Identifiable, Hashable {
-    let id: String // Идентификатор с сервера
-    let name: String // Название для отображения
+    let id: String
+    let name: String 
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)

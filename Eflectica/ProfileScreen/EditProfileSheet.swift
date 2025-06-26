@@ -15,18 +15,15 @@ struct EditProfileSheet: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Индикатор перетаскивания (опционально)
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 40, height: 6)
                     .padding(.top, 8)
                 
-                // Заголовок
                 Text("Редактировать профиль")
                     .font(.headline)
                     .padding(.top)
                 
-                // Форма редактирования
                 VStack(spacing: 16) {
                     TextField("Имя пользователя", text: $viewModel.username)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -43,7 +40,6 @@ struct EditProfileSheet: View {
                 }
                 .padding(.horizontal)
                 
-                // Кнопки
                 HStack(spacing: 16) {
                     Button("Отмена") {
                         isPresented = false
@@ -73,9 +69,8 @@ struct EditProfileSheet: View {
         .onAppear {
             viewModel.loadUserData(currentUser)
         }
-        // Ключевые модификаторы для bottom sheet
         .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.hidden) // скрыть стандартный индикатор
+        .presentationDragIndicator(.hidden)
         .presentationCornerRadius(20)
     }
 }

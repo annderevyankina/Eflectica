@@ -16,9 +16,9 @@ class CollectionsScreenViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     
-    private let worker = CollectionsScreenWorker()
+    let worker = CollectionsScreenWorker()
     
-    // MARK: - Фильтрация топовых коллекций (чужие, не мои и не подписки)
+    // MARK: - Фильтрация топовых коллекций (чужие)
     var topCollections: [Collection] {
         let myIds = Set(myCollections.map { $0.id })
         let subIds = Set(subCollections.map { $0.id })
@@ -40,9 +40,7 @@ class CollectionsScreenViewModel: ObservableObject {
     var filteredSubCollections: [Collection] {
         searchCollections(searchText, in: subCollections)
     }
-    // Для favorites не фильтруем, т.к. это одна виртуальная коллекция
     
-    // Для биндинга поиска
     @Published var searchText: String = ""
     
     func loadMyCollections(token: String) {

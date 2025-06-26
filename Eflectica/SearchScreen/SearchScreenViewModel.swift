@@ -10,8 +10,6 @@ import Foundation
 import Combine
 
 class SearchScreenViewModel: ObservableObject {
-    // Пример переменной, которая будет отображаться в View
-    @Published var greeting: String = "Hello, World!"
     
     @Published var categories: [Category] = [
         Category(id: "photoProcessing", name: "Обработка фото"),
@@ -57,25 +55,20 @@ class SearchScreenViewModel: ObservableObject {
         let lowercasedQuery = query.lowercased()
         var results: [Effect] = []
         
-        // Search through all effects in all categories
         for effects in effectsByCategory.values {
             let matchingEffects = effects.filter { effect in
-                // Search in effect name
                 if effect.name.lowercased().contains(lowercasedQuery) {
                     return true
                 }
                 
-                // Search in effect description
                 if effect.description.lowercased().contains(lowercasedQuery) {
                     return true
                 }
                 
-                // Search in programs
                 if (effect.programs?.map { $0.name } ?? []).contains(where: { $0.lowercased().contains(lowercasedQuery) }) {
                     return true
                 }
                 
-                // Search in categories
                 if (effect.categories ?? []).contains(where: { $0.lowercased().contains(lowercasedQuery) }) {
                     return true
                 }
@@ -85,14 +78,9 @@ class SearchScreenViewModel: ObservableObject {
             results.append(contentsOf: matchingEffects)
         }
         
-        // Remove duplicates and sort by rating
         searchResults = Array(Set(results)).sorted(by: { ($0.averageRating ?? 0) > ($1.averageRating ?? 0) })
     }
     
-    // Пример метода, который может изменять данные
-    func updateGreeting(newGreeting: String) {
-        self.greeting = newGreeting
-    }
     
     func loadEffects() {
         isLoading = true
@@ -104,15 +92,12 @@ class SearchScreenViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let effects):
-                    // Group effects by categories
                     var groupedEffects: [String: [Effect]] = [:]
                     
-                    // Initialize empty arrays for each category
                     self?.categories.forEach { category in
                         groupedEffects[category.id] = []
                     }
                     
-                    // Distribute effects by categories
                     for effect in effects {
                         for category in effect.categories ?? [] {
                             if let _ = groupedEffects[category] {

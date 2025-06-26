@@ -7,27 +7,23 @@
 
 import SwiftUI
 
-// Добавляю enum SortType для сортировки
 fileprivate enum SortType {
     case newest
     case popular
 }
 
-// Добавляю словари русских названий задач и программ
 fileprivate let taskNamesRu: [String: String] = [
     "advertisingProcessing": "Рекламная обработка",
     "atmosphereWeather": "Атмосфера и погода",
     "colorCorrection": "Цветокоррекция",
     "graphicContent": "Графический контент",
     "improvePhotoQuality": "Улучшение качества фото",
-    // ...добавь остальные задачи...
 ]
 fileprivate let programNamesRu: [String: String] = [
     "blender": "Blender",
     "fc": "Final Cut",
     "nuke": "Nuke",
     "spark": "Spark AR",
-    // ...добавь остальные программы...
 ]
 
 struct CategoryView: View {
@@ -47,16 +43,13 @@ struct CategoryView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                // Sticky header
                 VStack(alignment: .leading, spacing: 8) {
-                    // Первая строка — только заголовок
                     Text(category.name)
                         .font(.custom("BasisGrotesquePro-Medium", size: 32))
                         .foregroundStyle(primaryBlue)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                         .padding(.top, 16)
-                    // Вторая строка — иконки сортировки и фильтра + теги рядом с фильтром
                     HStack(alignment: .center, spacing: 8) {
                         Menu {
                             Button("Сначала новые") {
@@ -76,7 +69,6 @@ struct CategoryView: View {
                                 .foregroundStyle(textColor)
                         }
                         .buttonStyle(IconSquareButtonStyle())
-                        // Фильтр + теги справа от фильтра
                         HStack(spacing: 4) {
                             Button(action: { showingFilterSheet = true }) {
                                 Image("filterIcon")
@@ -87,7 +79,6 @@ struct CategoryView: View {
                                     .foregroundStyle(textColor)
                             }
                             .buttonStyle(IconSquareButtonStyle())
-                            // Теги выбранных задач и программ
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
                                     ForEach(selectedTasks, id: \ .self) { task in
@@ -152,9 +143,7 @@ struct CategoryView: View {
                     .padding(.leading, 16)
                     .padding(.bottom, 24)
                 }
-                // Divider если нужно
                 Divider()
-                // Список эффектов
                 ScrollView {
                     LazyVStack(spacing: 16) {
                         ForEach(filteredEffects ?? effects) { effect in
@@ -218,7 +207,6 @@ struct CategoryView: View {
     }
 }
 
-// Модификация IconSquareButtonStyle для кастомной высоты
 struct IconSquareButtonStyle: ButtonStyle {
     var borderColor: Color = Color("Grey")
     var backgroundColor: Color = Color("WhiteColor")

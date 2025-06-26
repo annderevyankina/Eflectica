@@ -8,7 +8,6 @@
 import SwiftUI
 import UIKit
 import Foundation
-import Eflectica
 
 struct EffectDetailView: View {
     @StateObject var viewModel: EffectDetailViewModel
@@ -159,7 +158,7 @@ struct EffectDetailView: View {
                         .padding(.horizontal, 24)
                         .padding(.bottom, 20)
                         
-                        // Программы (убрать systemName-иконки, оставить только ассетные)
+                        // Программы
                         if !effectCard.programs.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Подойдет для")
@@ -510,15 +509,12 @@ struct FlexibleTagsView: View {
             let taskText = taskDescriptions[taskId] ?? taskId
             let tagWidth = estimateTagWidth(for: taskText)
             
-            // Проверяем, поместится ли тег в текущую строку
             let widthWithSpacing = currentRowWidth + (currentRow.isEmpty ? 0 : horizontalSpacing) + tagWidth
             
             if widthWithSpacing <= effectiveWidth && !currentRow.isEmpty {
-                // Помещается в текущую строку
                 currentRow.append(taskId)
                 currentRowWidth = widthWithSpacing
             } else {
-                // Не помещается, начинаем новую строку
                 if !currentRow.isEmpty {
                     rows.append(currentRow)
                 }
@@ -527,7 +523,6 @@ struct FlexibleTagsView: View {
             }
         }
         
-        // Добавляем последнюю строку
         if !currentRow.isEmpty {
             rows.append(currentRow)
         }

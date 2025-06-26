@@ -14,12 +14,10 @@ struct CollectionEffectElement: Decodable, Identifiable {
     let description: String
     let programs: [EffectProgram]?
     let programsWithVersions: [EffectProgram]?
-    // Добавьте другие нужные поля по аналогии с Effect
 
     enum CodingKeys: String, CodingKey {
         case id, name, img, description, programs
         case programsWithVersions = "programs_with_versions"
-        // Добавьте другие кейсы по необходимости
     }
 
     var allPrograms: [EffectProgram]? {

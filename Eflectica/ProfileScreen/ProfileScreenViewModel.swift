@@ -11,13 +11,14 @@ final class ProfileScreenViewModel: ObservableObject {
     @Published var user: User?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var hasTriedLoading = false
 
     private let worker = ProfileScreenWorker()
 
-    /// Загружает профиль текущего пользователя по токену
     func loadCurrentUser(token: String) {
         // Логируем токен для отладки
         print("ProfileScreenViewModel – token:", token)
+        print("[ProfileScreenViewModel] loadCurrentUser called")
 
         user = nil
         errorMessage = nil
@@ -26,6 +27,8 @@ final class ProfileScreenViewModel: ObservableObject {
         worker.fetchCurrentUser(token: token) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
+                self?.hasTriedLoading = true
+                print("[ProfileScreenViewModel] loadCurrentUser finished, result: \(result)")
 
                 switch result {
                 case .success(let user):

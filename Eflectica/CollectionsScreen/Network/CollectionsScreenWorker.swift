@@ -16,7 +16,6 @@ struct Subscription: Decodable, Identifiable {
     let id: Int
     let collectionId: Int
     let userId: Int
-    // Можно добавить created_at, updated_at если нужно
     enum CodingKeys: String, CodingKey {
         case id
         case collectionId = "collection_id"
@@ -74,7 +73,6 @@ class CollectionsScreenWorker {
                     print("[CollectionsWorker] Decoded collections count: \(collections.count)")
                     completion(.success(collections))
                 } else {
-                    // Для остальных — объект с ключом collections
                     let response = try JSONDecoder().decode(CollectionsResponse.self, from: data)
                     print("[CollectionsWorker] Decoded collections count: \(response.collections.count)")
                     completion(.success(response.collections))
@@ -87,7 +85,6 @@ class CollectionsScreenWorker {
         task.resume()
     }
 
-    // Для подписок: получаем подписки, затем коллекции по их id
     private func fetchSubscriptions(token: String, completion: @escaping (Result<[Collection], Error>) -> Void) {
         guard let url = URL(string: "http://localhost:3000/api/v1/sub_collections") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
@@ -121,13 +118,11 @@ class CollectionsScreenWorker {
         task.resume()
     }
 
-    // Получить коллекции по массиву id (можно оптимизировать на сервере)
     func fetchCollectionsByIds(ids: [Int], token: String, completion: @escaping (Result<[Collection], Error>) -> Void) {
         guard !ids.isEmpty else {
             completion(.success([]))
             return
         }
-        // Пример: делаем последовательные запросы (можно оптимизировать)
         var collections: [Collection] = []
         let group = DispatchGroup()
         var lastError: Error?

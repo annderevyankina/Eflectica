@@ -8,9 +8,9 @@
 import Foundation
 
 struct Program: Identifiable {
-    let id: String // Идентификатор с сервера
-    let name: String // Полное название для отображения
-    let iconName: String // Название иконки в ассетах
+    let id: String
+    let name: String
+    let iconName: String 
     
     static let all: [Program] = [
         Program(id: "photoshop", name: "Adobe Photoshop", iconName: "photoshop_icon"),

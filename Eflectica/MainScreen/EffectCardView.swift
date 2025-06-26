@@ -68,9 +68,7 @@ struct EffectCardView: View {
 
     var body: some View {
         ZStack {
-            // Основная карточка
             VStack(alignment: .leading, spacing: 10) {
-                // Image slider with before/after images
                 TabView(selection: $selectedImage) {
                     ForEach(images.indices, id: \.self) { index in
                         let imageUrl = images[index]
@@ -179,7 +177,6 @@ struct EffectCardView: View {
             }
             .opacity(showGIF ? 0 : 1)
 
-            // GIFView поверх, если showGIF
             if showGIF, images[selectedImage].lowercased().hasSuffix(".gif"), let url = URL(string: images[selectedImage]) {
                 GIFView(url: url)
                     .frame(maxWidth: .infinity)
@@ -201,7 +198,6 @@ struct EffectCardView: View {
     }
 }
 
-// Helper extension for applying corner radius to specific corners
 extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))

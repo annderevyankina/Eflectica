@@ -6,7 +6,6 @@ struct CollectionsListView: View {
     let user: User?
     @State private var selectedCollection: Collection? = nil
     
-    // Вынесенная переменная для элементов коллекции
     var collectionElements: [CollectionElement] {
         guard let collection = selectedCollection else { return [] }
         let effects = collection.effects?.map { CollectionElement.effect($0) } ?? []
@@ -47,12 +46,12 @@ struct CollectionsListView: View {
         }
         .background(Color(.systemGray6).ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        // Скрытый NavigationLink
         NavigationLink(
             destination: Group {
                 if let collection = selectedCollection {
                     ElementsOfCollectionView(
                         elements: collectionElements,
+                        collectionId: collection.id,
                         collectionName: collection.name,
                         user: user
                     )

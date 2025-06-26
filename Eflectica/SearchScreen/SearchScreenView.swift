@@ -48,7 +48,6 @@ struct SearchScreenView: View {
                         .padding(.horizontal)
                         .padding(.top, 16)
                     
-                    // Search Bar
                     HStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(greyColor)
@@ -71,7 +70,6 @@ struct SearchScreenView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 32) {
                             if viewModel.searchText.isEmpty {
-                                // Show all categories when search is empty
                                 ForEach(viewModel.categories) { category in
                                     CategorySection(
                                         category: category,
@@ -79,7 +77,6 @@ struct SearchScreenView: View {
                                     )
                                 }
                             } else {
-                                // Show search results
                                 if viewModel.searchResults.isEmpty {
                                     Text("Ничего не найдено")
                                         .font(.custom("BasisGrotesquePro-Regular", size: 17))
@@ -156,7 +153,6 @@ struct CategorySection: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    // Показываем все эффекты, если их меньше 3, иначе только первые 3
                     ForEach(effects.prefix(3)) { effect in
                         NavigationLink(value: EffectRoute.effectDetail(id: effect.id)) {
                             EffectCardView(
@@ -169,7 +165,6 @@ struct CategorySection: View {
                             )
                         }
                     }
-                    // Кнопка "Все" появляется всегда, если есть хотя бы 1 эффект
                     if effects.count > 0 {
                         NavigationLink(value: CategoryRoute.category(category: category)) {
                             VStack(spacing: 8) {
@@ -202,9 +197,7 @@ struct CategorySection: View {
 }
 
 // MARK: - Category Route
-enum CategoryRoute: Hashable {
-    case category(category: Category)
-}
+// CategoryRoute теперь находится в Models/SearchScreenModels.swift
 
 
 

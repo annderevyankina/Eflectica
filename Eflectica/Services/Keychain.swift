@@ -75,7 +75,7 @@ final class KeychainService: KeychainLogic {
         let status = SecItemAdd(query as CFDictionary, nil)
 
         if status == errSecDuplicateItem {
-            // If the item already exists, update it
+
             let updateQuery = [
                 kSecClass as String: kSecClassGenericPassword as String,
                 kSecAttrService as String: service,

@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// Универсальный enum для элементов коллекции
 enum CollectionElement: Identifiable {
     case effect(Effect)
     case image(CollectionImage)
@@ -25,24 +24,27 @@ enum CollectionElement: Identifiable {
 struct ElementsOfCollectionView: View {
     @EnvironmentObject var collectionsViewModel: CollectionsScreenViewModel
     let elements: [CollectionElement]
+    let collectionId: Int
+    let collectionName: String?
+    let user: User?
     var isMy: Bool = false
     var onAddElement: (() -> Void)? = nil
-    var collectionName: String? = nil
     var onEdit: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
-    let user: User?
     
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showShareSheet = false
     private let defaultShareUrl = "https://t.me/efixmedia"
     @State private var selectedEffectId: Int? = nil
+    @State private var showElementDetail = false
+    @State private var selectedElement: CollectionElement? = nil
     
     var body: some View {
         ZStack {
             Color("LightGrey").ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    // Заголовок коллекции с иконкой edit
+                    // Заголовок коллекции
                     if let collectionName = collectionName {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(alignment: .center, spacing: 8) {
@@ -96,7 +98,7 @@ struct ElementsOfCollectionView: View {
                             .padding(.horizontal)
                         }
                     }
-                    // Эффекты - горизонтальный скролл
+                    // Эффекты
                     let effectElements = elements.filter { if case .effect = $0 { return true } else { return false } }
                     if !effectElements.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
@@ -137,7 +139,7 @@ struct ElementsOfCollectionView: View {
                             }
                         }
                     }
-                    // Референсы - горизонтальный скролл
+                    // Референсы
                     let imageElements = elements.filter { if case .image = $0 { return true } else { return false } }
                     if !imageElements.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
@@ -150,6 +152,10 @@ struct ElementsOfCollectionView: View {
                                     ForEach(imageElements.prefix(3)) { element in
                                         if case .image(let image) = element {
                                             CollectionImageCardView_Mockup(image: image)
+                                                .onTapGesture {
+                                                    selectedElement = .image(image)
+                                                    showElementDetail = true
+                                                }
                                         }
                                     }
                                     if imageElements.count > 3 {
@@ -175,7 +181,7 @@ struct ElementsOfCollectionView: View {
                             }
                         }
                     }
-                    // Ссылки - горизонтальный скролл
+                    // Ссылки
                     let linkElements = elements.filter { if case .link = $0 { return true } else { return false } }
                     if !linkElements.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
@@ -188,6 +194,10 @@ struct ElementsOfCollectionView: View {
                                     ForEach(linkElements.prefix(3)) { element in
                                         if case .link(let link) = element {
                                             CollectionLinkCardView(link: link)
+                                                .onTapGesture {
+                                                    selectedElement = .link(link)
+                                                    showElementDetail = true
+                                                }
                                         }
                                     }
                                     if linkElements.count > 3 {
@@ -213,7 +223,7 @@ struct ElementsOfCollectionView: View {
                             }
                         }
                     }
-                    // Кнопка удалить коллекцию
+
                     if let onDelete = onDelete {
                         Button(action: onDelete) {
                             Text("Удалить коллекцию")
@@ -235,7 +245,6 @@ struct ElementsOfCollectionView: View {
                 }
                 .padding(.bottom, 16)
             }
-            // Скрытый NavigationLink для перехода к EffectDetailView
             NavigationLink(
                 destination: Group {
                     if let effectId = selectedEffectId {
@@ -253,11 +262,35 @@ struct ElementsOfCollectionView: View {
                 )
             ) { EmptyView() }
             .hidden()
+            // Модалка для просмотра/удаления элемента
+            .sheet(isPresented: $showElementDetail) {
+                if let selectedElement = selectedElement {
+                    ElementDetailView(
+                        type: {
+                            switch selectedElement {
+                            case .link(let link): return .link(link)
+                            case .image(let image): return .reference(image)
+                            default: fatalError("Not supported")
+                            }
+                        }(),
+                        collectionId: collectionId,
+                        isOwner: isMy,
+                        onDeleteSuccess: {
+                            // После удаления обновить коллекцию
+                            if let token = authViewModel.token {
+                                collectionsViewModel.loadMyCollections(token: token)
+                            }
+                        }
+                    )
+                    .environmentObject(collectionsViewModel)
+                    .environmentObject(authViewModel)
+                }
+            }
         }
     }
 }
 
-// MARK: - Карточка эффекта с программой
+// MARK: - Карточка эффекта
 struct EffectCardViewWithProgram: View {
     let effect: Effect
     var body: some View {
@@ -277,7 +310,7 @@ struct EffectCardViewWithProgram: View {
     }
 }
 
-// MARK: - Карточка изображения по макету
+// MARK: - Карточка 
 struct CollectionImageCardView_Mockup: View {
     let image: CollectionImage
     var body: some View {
@@ -312,7 +345,7 @@ struct CollectionImageCardView_Mockup: View {
     }
 }
 
-// MARK: - Карточка изображения
+// MARK: - Карточка рефа
 struct CollectionImageCardView: View {
     let image: CollectionImage
     var body: some View {
@@ -331,7 +364,6 @@ struct CollectionImageCardView: View {
             }
             .cornerRadius(8)
             
-            // Информация
             VStack(alignment: .leading, spacing: 4) {
                 Text(image.title ?? "Изображение")
                     .font(.custom("BasisGrotesquePro-Medium", size: 16))
@@ -400,9 +432,7 @@ struct CollectionLinkCardView: View {
     }
 }
 
-// Вспомогательная функция для извлечения programs_with_versions из effect через reflection
 func extractProgramsWithVersions(from effect: Effect) -> [EffectProgram]? {
-    // Попробуем получить rawValue через Mirror
     let mirror = Mirror(reflecting: effect)
     if let child = mirror.children.first(where: { $0.label == "programs_with_versions" }),
        let value = child.value as? [[String: Any]] {
