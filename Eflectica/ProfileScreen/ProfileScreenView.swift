@@ -55,29 +55,41 @@ struct ProfileScreenView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if viewModel.user == nil {
-                    VStack {
-                        Spacer()
-                        Text(viewModel.errorMessage ?? "Не можем загрузить данные. Проверьте подключение к интернету")
-                            .font(.custom("BasisGrotesquePro-Regular", size: 17))
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                        Button("Повторить") {
-                            if let token = authViewModel.token {
-                                viewModel.loadCurrentUser(token: token)
-                            } else {
-                                viewModel.errorMessage = "Нет JWT-токена"
+                    ZStack(alignment: .topTrailing) {
+                        VStack {
+                            Spacer()
+                            Text(viewModel.errorMessage ?? "Не можем загрузить данные. Проверьте подключение к интернету")
+                                .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                            Button("Повторить") {
+                                if let token = authViewModel.token {
+                                    viewModel.loadCurrentUser(token: token)
+                                } else {
+                                    viewModel.errorMessage = "Нет JWT-токена"
+                                }
                             }
+                            .font(.custom("BasisGrotesquePro-Medium", size: 17))
+                            .foregroundColor(.white)
+                            .frame(height: 48)
+                            .frame(maxWidth: 220)
+                            .background(Color("PrimaryBlue"))
+                            .cornerRadius(8)
+                            .padding(.top, 16)
+                            Spacer()
                         }
-                        .font(.custom("BasisGrotesquePro-Medium", size: 17))
-                        .foregroundColor(.white)
-                        .frame(height: 48)
-                        .frame(maxWidth: 220)
-                        .background(Color("PrimaryBlue"))
-                        .cornerRadius(8)
-                        .padding(.top, 16)
-                        Spacer()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        Button(action: { 
+                            authViewModel.logout()
+                            viewModel.user = nil
+                        }) {
+                            Image("logoutIcon")
+                                .renderingMode(.original)
+                                .resizable()
+                                .frame(width: 28, height: 28)
+                                .padding(12)
+                        }
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     VStack {
                         ZStack(alignment: .topTrailing) {
@@ -88,33 +100,45 @@ struct ProfileScreenView: View {
                                 } else if let user = viewModel.user {
                                     let isEmptyProfile = (user.username?.isEmpty ?? true) && (user.bio?.isEmpty ?? true) && (user.contact?.isEmpty ?? true)
                                     if isEmptyProfile {
-                                        VStack(spacing: 24) {
-                                            Spacer()
-                                            Image("default_avatar")
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 140, height: 140)
-                                                .clipShape(Circle())
-                                                .padding(.top, 36)
-                                            Text("Здесь пока ничего нет. Ты можешь редактировать профиль, чтобы добавить информацию о себе")
+                                        ZStack(alignment: .topTrailing) {
+                                            VStack(spacing: 24) {
+                                                Spacer()
+                                                Image("default_avatar")
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 140, height: 140)
+                                                    .clipShape(Circle())
+                                                    .padding(.top, 36)
+                                                Text("Здесь пока ничего нет. Ты можешь редактировать профиль, чтобы добавить информацию о себе")
+                                                    .font(.custom("BasisGrotesquePro-Regular", size: 17))
+                                                    .foregroundColor(.gray)
+                                                    .multilineTextAlignment(.center)
+                                                    .padding(.horizontal)
+                                                Button("Заполнить профиль") {
+                                                    showEditProfileAlert = true
+                                                }
                                                 .font(.custom("BasisGrotesquePro-Regular", size: 17))
-                                                .foregroundColor(.gray)
-                                                .multilineTextAlignment(.center)
-                                                .padding(.horizontal)
-                                            Button("Заполнить профиль") {
-                                                showEditProfileAlert = true
+                                                .foregroundColor(.white)
+                                                .frame(maxWidth: .infinity)
+                                                .frame(height: 48)
+                                                .background(Color("PrimaryBlue"))
+                                                .cornerRadius(8)
+                                                .padding(.horizontal, 40)
+                                                .alert(isPresented: $showEditProfileAlert) {
+                                                    Alert(title: Text("Редактирование профиля скоро будет доступно"))
+                                                }
+                                                Spacer()
                                             }
-                                            .font(.custom("BasisGrotesquePro-Regular", size: 17))
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .frame(height: 48)
-                                            .background(Color("PrimaryBlue"))
-                                            .cornerRadius(8)
-                                            .padding(.horizontal, 40)
-                                            .alert(isPresented: $showEditProfileAlert) {
-                                                Alert(title: Text("Редактирование профиля скоро будет доступно"))
+                                            Button(action: { 
+                                                authViewModel.logout()
+                                                viewModel.user = nil
+                                            }) {
+                                                Image("logoutIcon")
+                                                    .renderingMode(.original)
+                                                    .resizable()
+                                                    .frame(width: 28, height: 28)
+                                                    .padding(12)
                                             }
-                                            Spacer()
                                         }
                                     } else {
                                         ScrollView {
@@ -139,7 +163,10 @@ struct ProfileScreenView: View {
                                                             .foregroundColor(Color("PrimaryBlue"))
                                                     }
                                                     Spacer()
-                                                    Button(action: { authViewModel.logout() }) {
+                                                    Button(action: { 
+                                                        authViewModel.logout()
+                                                        viewModel.user = nil
+                                                    }) {
                                                         Image("logoutIcon")
                                                             .renderingMode(.original)
                                                             .resizable()
@@ -426,10 +453,10 @@ struct ProfileScreenView: View {
                 case .success:
                     // Успешно удалили аккаунт, выходим из системы
                     authViewModel.logout()
+                    viewModel.user = nil
                 case .failure(let error):
                     // Показываем ошибку пользователю
                     print("Ошибка удаления аккаунта: \(error)")
-                    // Можно добавить дополнительное уведомление об ошибке
                 }
             }
         }
